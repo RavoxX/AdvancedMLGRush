@@ -136,6 +136,76 @@ public class DefaultGadgets {
                         "gadgets.legend",
                         "&cUnlocked &8• &7The rarest knockback perk",
                         "&cRequires &dLEGEND"
+                ),
+                new Gadget(
+                        "&8» &fFrost Crystal",
+                        XMaterial.PRISMARINE_CRYSTALS.name(),
+                        "none",
+                        "&cUnlocked &8• &7A shard of frozen precision",
+                        " "
+                ),
+                new Gadget(
+                        "&8» &dLucky Paw",
+                        XMaterial.RABBIT_FOOT.name(),
+                        "none",
+                        "&cUnlocked &8• &7Fast, light and unexpectedly strong",
+                        " "
+                ),
+                new Gadget(
+                        "&8» &2Venom Fang",
+                        XMaterial.FERMENTED_SPIDER_EYE.name(),
+                        "none",
+                        "&cUnlocked &8• &7A poisonous-looking dueling relic",
+                        " "
+                ),
+                new Gadget(
+                        "&8» &fQuartz Rapier",
+                        XMaterial.QUARTZ.name(),
+                        "gadgets.vip",
+                        "&cUnlocked &8• &7Cut from pure Nether quartz",
+                        "&cRequires &6VIP"
+                ),
+                new Gadget(
+                        "&8» &8Shadow Flint",
+                        XMaterial.FLINT.name(),
+                        "gadgets.vip",
+                        "&cUnlocked &8• &7Small, dark and razor sharp",
+                        "&cRequires &6VIP"
+                ),
+                new Gadget(
+                        "&8» &cRush Rod",
+                        XMaterial.SUGAR.name(),
+                        "gadgets.vip",
+                        "&cUnlocked &8• &7Built for lightning-fast combos",
+                        "&cRequires &6VIP"
+                ),
+                new Gadget(
+                        "&8» &4Nether Thorn",
+                        XMaterial.NETHER_WART.name(),
+                        "gadgets.mvp",
+                        "&cUnlocked &8• &7Grown in the hottest Nether fortress",
+                        "&cRequires &bMVP"
+                ),
+                new Gadget(
+                        "&8» &3Inkblade",
+                        XMaterial.INK_SAC.name(),
+                        "gadgets.mvp",
+                        "&cUnlocked &8• &7Leaves only a dark blur behind",
+                        "&cRequires &bMVP"
+                ),
+                new Gadget(
+                        "&8» &6Gilded Reaper",
+                        XMaterial.GOLDEN_HOE.name(),
+                        "gadgets.legend",
+                        "&cUnlocked &8• &7A ceremonial weapon of champions",
+                        "&cRequires &dLEGEND"
+                ),
+                new Gadget(
+                        "&8» &5Dragonbreaker",
+                        XMaterial.DIAMOND_AXE.name(),
+                        "gadgets.legend",
+                        "&cUnlocked &8• &7Heavy enough to shake the arena",
+                        "&cRequires &dLEGEND"
                 )
         ));
     }
@@ -252,6 +322,76 @@ public class DefaultGadgets {
                         XMaterial.DIAMOND_BLOCK.name(),
                         "gadgets.legend",
                         "&cUnlocked &8• &7The ultimate block perk",
+                        "&cRequires &dLEGEND"
+                ),
+                new Gadget(
+                        "&8» &7Castle Stone",
+                        XMaterial.STONE_BRICKS.name(),
+                        "none",
+                        "&cUnlocked &8• &7Build bridges fit for a fortress",
+                        " "
+                ),
+                new Gadget(
+                        "&8» &2Moss Ruins",
+                        XMaterial.MOSSY_COBBLESTONE.name(),
+                        "none",
+                        "&cUnlocked &8• &7Ancient overgrown bridgework",
+                        " "
+                ),
+                new Gadget(
+                        "&8» &4Nether Ore",
+                        XMaterial.NETHER_QUARTZ_ORE.name(),
+                        "none",
+                        "&cUnlocked &8• &7Raw crystals straight from the Nether",
+                        " "
+                ),
+                new Gadget(
+                        "&8» &8Blacksteel",
+                        XMaterial.COAL_BLOCK.name(),
+                        "gadgets.vip",
+                        "&cUnlocked &8• &7A sleek pitch-black bridge",
+                        "&cRequires &6VIP"
+                ),
+                new Gadget(
+                        "&8» &fTitan Iron",
+                        XMaterial.IRON_BLOCK.name(),
+                        "gadgets.vip",
+                        "&cUnlocked &8• &7Industrial strength with a clean finish",
+                        "&cRequires &6VIP"
+                ),
+                new Gadget(
+                        "&8» &6Harvest Bale",
+                        XMaterial.HAY_BLOCK.name(),
+                        "gadgets.vip",
+                        "&cUnlocked &8• &7Warm golden lanes across the void",
+                        "&cRequires &6VIP"
+                ),
+                new Gadget(
+                        "&8» &2Melon Rush",
+                        XMaterial.MELON.name(),
+                        "gadgets.mvp",
+                        "&cUnlocked &8• &7Bright stripes for fearless rushers",
+                        "&cRequires &bMVP"
+                ),
+                new Gadget(
+                        "&8» &eAncient Sponge",
+                        XMaterial.SPONGE.name(),
+                        "gadgets.mvp",
+                        "&cUnlocked &8• &7A rare monument treasure",
+                        "&cRequires &bMVP"
+                ),
+                new Gadget(
+                        "&8» &bMoon Lantern",
+                        XMaterial.SEA_LANTERN.name(),
+                        "gadgets.legend",
+                        "&cUnlocked &8• &7Turns every bridge into a light trail",
+                        "&cRequires &dLEGEND"
+                ),
+                new Gadget(
+                        "&8» &dEnder Stone",
+                        XMaterial.END_STONE.name(),
+                        "gadgets.legend",
+                        "&cUnlocked &8• &7Forged at the edge of the End",
                         "&cRequires &dLEGEND"
                 )
         ));

@@ -40,6 +40,7 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     private static final String GOONRUSH_BLUE_THEME_MIGRATED = "goonrush_blue_theme_migrated";
     private static final String GOONRUSH_GREEN_THEME_MIGRATED = "goonrush_green_theme_migrated";
     private static final String GOONRUSH_RED_THEME_MIGRATED = "goonrush_red_theme_migrated";
+    private static final String GOONRUSH_RED_ACTIONBAR_MIGRATED = "goonrush_red_actionbar_migrated";
 
     private final Placeholders placeholders;
 
@@ -79,6 +80,11 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
             getYamlConfiguration().set(GOONRUSH_RED_THEME_MIGRATED, true);
             saveConfig();
         }
+        if (!getBoolean(GOONRUSH_RED_ACTIONBAR_MIGRATED)) {
+            getYamlConfiguration().set(ROUND_ACTIONBAR, createRoundActionbar());
+            getYamlConfiguration().set(GOONRUSH_RED_ACTIONBAR_MIGRATED, true);
+            saveConfig();
+        }
     }
 
     @Override
@@ -89,8 +95,7 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     @Override
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
         list.add(new Pair<>(SCOREBOARD_TITLE, "&c&lGOONRUSH"));
-        list.add(new Pair<>(ROUND_ACTIONBAR,
-                "&f%player1% &8» &f%player1_score% &8| &f%player2% &8» &f%player2_score%"));
+        list.add(new Pair<>(ROUND_ACTIONBAR, createRoundActionbar()));
         list.add(new Pair<>(LOBBY_SCOREBOARD, new ArrayList<>(Arrays.asList(
                 "&1",
                 "&7Wins&8:",
@@ -109,6 +114,11 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(GOONRUSH_BLUE_THEME_MIGRATED, false));
         list.add(new Pair<>(GOONRUSH_GREEN_THEME_MIGRATED, false));
         list.add(new Pair<>(GOONRUSH_RED_THEME_MIGRATED, false));
+        list.add(new Pair<>(GOONRUSH_RED_ACTIONBAR_MIGRATED, false));
+    }
+
+    private static String createRoundActionbar() {
+        return "&c%player1% &8» &c%player1_score% &8| &c%player2% &8» &c%player2_score%";
     }
 
     private static ArrayList<String> createRoundScoreboard() {

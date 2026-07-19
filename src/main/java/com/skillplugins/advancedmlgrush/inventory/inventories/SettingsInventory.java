@@ -32,14 +32,23 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Singleton
 public class SettingsInventory extends AbstractInventory {
+
+    private static final long BLOCK_REMOVER_REFRESH_DELAY_TICKS = 4L;
+
+    private final Map<UUID, BukkitTask> blockRemoverRefreshTasks = new HashMap<>();
 
     @Inject
     private RoundsInventory roundsInventory;
@@ -47,6 +56,8 @@ public class SettingsInventory extends AbstractInventory {
     private MapInventory mapInventory;
     @Inject
     private SQLDataCache sqlDataCache;
+    @Inject
+    private JavaPlugin javaPlugin;
 
     @PostConstruct
     public void initInventory() {
@@ -92,20 +103,21 @@ public class SettingsInventory extends AbstractInventory {
                 if (inventoryUtils.isOpenInventory(player, clazz)) {
                     final Optional<Player> optionalPlayer = Optional.of(player);
                     final ItemStack currentItem = event.getCurrentItem();
-                    if (itemUtils.compare(currentItem, EnumItem.SETTINGS_MAP, optionalPlayer)) {
+                    if (event.getRawSlot() == itemManager.getItemSlot(EnumItem.SETTINGS_BLOCK_REMOVER)
+                            && itemUtils.isValidItem(currentItem)) {
+                        if (sqlDataCache.isLoaded(player)) {
+                            final CachedSQLData data = sqlDataCache.getSQLData(player);
+                            final BlockRemover next = BlockRemover.fromId(data.getSettingsBlockRemover()).next();
+                            data.setSettingsBlockRemover(next.getId());
+                            scheduleBlockRemoverRefresh(event.getInventory(), player);
+                            soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
+                        }
+                    } else if (itemUtils.compare(currentItem, EnumItem.SETTINGS_MAP, optionalPlayer)) {
                         mapInventory.open(player);
                         soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
                     } else if (itemUtils.compare(currentItem, EnumItem.SETTINGS_ROUNDS, optionalPlayer)) {
                         roundsInventory.open(player);
                         soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
-                    } else if (itemUtils.compare(currentItem, EnumItem.SETTINGS_BLOCK_REMOVER, optionalPlayer)) {
-                        if (sqlDataCache.isLoaded(player)) {
-                            final CachedSQLData data = sqlDataCache.getSQLData(player);
-                            final BlockRemover next = BlockRemover.fromId(data.getSettingsBlockRemover()).next();
-                            data.setSettingsBlockRemover(next.getId());
-                            setBlockRemoverItem(event.getInventory(), player);
-                            soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
-                        }
                     }
                 }
             }
@@ -115,11 +127,35 @@ public class SettingsInventory extends AbstractInventory {
             protected void onEvent(final @NotNull InventoryCloseEvent event) {
                 final Player player = (Player) event.getPlayer();
                 if (inventoryUtils.isOpenInventory(player, clazz)) {
-                    sqlDataCache.save(player);
+                    cancelBlockRemoverRefresh(player);
+                    sqlDataCache.saveBlockRemover(player);
+                    inventoryManager.unregister(player);
                 }
             }
         });
         return eventListeners;
+    }
+
+    private void scheduleBlockRemoverRefresh(final @NotNull Inventory inventory,
+                                             final @NotNull Player player) {
+        cancelBlockRemoverRefresh(player);
+        final UUID uniqueId = player.getUniqueId();
+        final BukkitTask task = Bukkit.getScheduler().runTaskLater(javaPlugin, () -> {
+            blockRemoverRefreshTasks.remove(uniqueId);
+            if (player.isOnline()
+                    && inventoryUtils.isOpenInventory(player, this.getClass())
+                    && player.getOpenInventory().getTopInventory().equals(inventory)) {
+                setBlockRemoverItem(inventory, player);
+            }
+        }, BLOCK_REMOVER_REFRESH_DELAY_TICKS);
+        blockRemoverRefreshTasks.put(uniqueId, task);
+    }
+
+    private void cancelBlockRemoverRefresh(final @NotNull Player player) {
+        final BukkitTask task = blockRemoverRefreshTasks.remove(player.getUniqueId());
+        if (task != null) {
+            task.cancel();
+        }
     }
 
     private void setBlockRemoverItem(final @NotNull Inventory inventory, final @NotNull Player player) {

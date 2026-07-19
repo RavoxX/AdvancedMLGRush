@@ -59,6 +59,8 @@ public class MessageConfig extends Configurable implements Replaceable {
     public static final String UNKNOWN_PLAYER = "unknown_player";
     public static final String UPDATE_AVAILABLE = "update_available";
     public static final String SUDO_COMMAND_PLAYER_MESSAGE = "sudo_command_player_message";
+    public static final String PING = "ping";
+    public static final String NICK_COMMAND_COOLDOWN = "nick_command_cooldown";
 
     //Command syntaxes
     public static final String SETUP_MAP_COMMAND_SYNTAX = "setup_max_command_syntax";
@@ -139,6 +141,9 @@ public class MessageConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(UNKNOWN_PLAYER, "&cPlayer not found."));
         list.add(new Pair<>(UPDATE_AVAILABLE, "&7A new update is available&8: &e%version%"));
         list.add(new Pair<>(SUDO_COMMAND_PLAYER_MESSAGE, "&cThis command can be executed only from the console."));
+        list.add(new Pair<>(PING, "&7Your ping&8: &c%ping%ms"));
+        list.add(new Pair<>(NICK_COMMAND_COOLDOWN,
+                "&7Please wait &c%seconds%s &7before using /nick or /unnick again."));
 
         list.add(new Pair<>(SETUP_MAP_COMMAND_SYNTAX, "&cWrong syntax: /setupmap <2x1, 4x1> <name>"));
         list.add(new Pair<>(STATS_RESET_COMMAND_SYNTAX, "&cWrong syntax: /statsreset <name>"));

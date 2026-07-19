@@ -95,6 +95,21 @@ public class MLGDataSaver extends DataSaver {
         }
     }
 
+    public void updateBlockRemoverSync(final @NotNull Player player,
+                                       final @NotNull CachedSQLData cachedSQLData) {
+        if (isConnected()
+                && !cachedSQLData.isDefaultData()) {
+            executeUpdateSync(String.format(
+                    "UPDATE {name} " +
+                            "SET settings_block_remover = '%1$s' " +
+                            (isOfflineMode
+                                    ? "WHERE player_name = '%2$s';"
+                                    : "WHERE player_uuid = '%2$s';"),
+                    cachedSQLData.getSettingsBlockRemover(),
+                    isOfflineMode ? player.getName() : player.getUniqueId().toString()));
+        }
+    }
+
     public void resetStats(final @NotNull String playerName, final @NotNull Consumer<StatsResetState> consumer) {
         if (isConnected()) {
             super.executeQueryAsync(String.format(

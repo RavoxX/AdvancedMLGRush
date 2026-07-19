@@ -39,6 +39,7 @@ public class MainConfig extends Configurable {
     public static final String BLOCK_AMOUNT = "block_amount";
     public static final String INFINITE_BLOCKS = "infinite_blocks";
     public static final String BLOCK_REMOVER_DELAY_SECONDS = "block_remover_delay_seconds";
+    public static final String NICK_COMMAND_COOLDOWN_SECONDS = "nick_command_cooldown_seconds";
     public static final String MAP_ITEM_PREFIX = "map_item_prefix";
     public static final String PASTE_BLOCKS_PER_TICK = "paste_blocks_per_tick";
     public static final String DEFAULT_SERIALIZER = "default_serializer";
@@ -73,6 +74,7 @@ public class MainConfig extends Configurable {
         list.add(new Pair<>(BLOCK_AMOUNT, 32));
         list.add(new Pair<>(INFINITE_BLOCKS, true));
         list.add(new Pair<>(BLOCK_REMOVER_DELAY_SECONDS, 5));
+        list.add(new Pair<>(NICK_COMMAND_COOLDOWN_SECONDS, 10));
         list.add(new Pair<>(MAP_ITEM_PREFIX, "&8» &e"));
         list.add(new Pair<>(PASTE_BLOCKS_PER_TICK, 20));
         list.add(new Pair<>(DEFAULT_COMPRESSOR, "BASE64"));

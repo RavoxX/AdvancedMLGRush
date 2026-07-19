@@ -30,3 +30,4 @@ commands:
       - reset
       - clearstats
   sudo:
+  ping:
