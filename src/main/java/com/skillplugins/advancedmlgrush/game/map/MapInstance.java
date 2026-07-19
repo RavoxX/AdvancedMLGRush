@@ -51,6 +51,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -66,7 +67,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,7 +78,7 @@ import java.util.stream.Collectors;
 
 public class MapInstance implements EventHandler {
 
-    private final List<Location> placedBlocks = new ArrayList<>();
+    private final Map<Location, Player> placedBlocks = new HashMap<>();
     @Getter
     private final List<Player> spectators = new CopyOnWriteArrayList<>();
     @Getter
@@ -182,6 +184,28 @@ public class MapInstance implements EventHandler {
         eventListeners.add(new EventListener<EntityDamageByEntityEvent>(EntityDamageByEntityEvent.class, EventListenerPriority.MEDIUM) {
             @Override
             protected void onEvent(final @NotNull EntityDamageByEntityEvent event) {
+                if (event.getDamager() instanceof Arrow
+                        && event.getEntity() instanceof Player) {
+                    final Arrow arrow = (Arrow) event.getDamager();
+                    final Player entity = (Player) event.getEntity();
+
+                    if (loaded
+                            && players.containsKey(entity)
+                            && arrow.getShooter() instanceof Player) {
+                        final Player shooter = (Player) arrow.getShooter();
+                        event.setCancelled(false);
+                        event.setDamage(0);
+
+                        if (players.containsKey(shooter)
+                                && !shooter.equals(entity)) {
+                            killMap.put(entity, shooter);
+                        } else {
+                            killMap.remove(entity);
+                        }
+                    }
+                    return;
+                }
+
                 if (event.getDamager() instanceof Player
                         && event.getEntity() instanceof Player) {
 
@@ -231,7 +255,9 @@ public class MapInstance implements EventHandler {
                                     if (score == rounds) {
                                         endGame(player);
                                     } else {
-                                        clearBlocks();
+                                        if (getBlockRemover() == BlockRemover.ROUND_RESET) {
+                                            clearBlocks();
+                                        }
                                         teleportToPlayerSpawn(players.keySet());
                                         scoreboardManager.updateScoreboard(players.keySet());
                                         players.keySet().forEach(player1 -> {
@@ -244,9 +270,10 @@ public class MapInstance implements EventHandler {
                             }
                         }
 
-                        if (placedBlocks.contains(blockLocation)) {
+                        if (placedBlocks.containsKey(blockLocation)) {
                             event.getBlock().getDrops().clear();
                             event.setCancelled(false);
+                            placedBlocks.remove(blockLocation);
                         }
                     }
                 }
@@ -282,7 +309,7 @@ public class MapInstance implements EventHandler {
                                 if (infiniteBlocks) {
                                     player.getItemInHand().setAmount(mainConfig.getInt(MainConfig.BLOCK_AMOUNT));
                                 }
-                                placedBlocks.add(location);
+                                placedBlocks.put(location, player);
                                 sqlDataCache.getSQLData(player).increasePlacedBlocks();
                             }
                         }
@@ -302,6 +329,9 @@ public class MapInstance implements EventHandler {
 
                             if (event.getTo().getY() <= mapData.getDeathHeight()) {
                                 if (players.containsKey(player)) {
+                                    if (getBlockRemover() == BlockRemover.DEATH_RESET) {
+                                        clearBlocks(player);
+                                    }
                                     teleportToPlayerSpawn(player);
                                     soundUtil.playSound(player, SoundConfig.DEATH);
                                     sqlDataCache.getSQLData(player).increaseDeaths();
@@ -482,11 +512,26 @@ public class MapInstance implements EventHandler {
         }
     }
 
+    private BlockRemover getBlockRemover() {
+        return BlockRemover.fromConfig(mainConfig.getString(MainConfig.BLOCK_REMOVER));
+    }
+
     private void clearBlocks() {
-        for (final Location placedBlock : placedBlocks) {
+        for (final Location placedBlock : placedBlocks.keySet()) {
             placedBlock.getBlock().setType(Material.AIR);
         }
         placedBlocks.clear();
+    }
+
+    private void clearBlocks(final @NotNull Player player) {
+        final Iterator<Map.Entry<Location, Player>> iterator = placedBlocks.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<Location, Player> entry = iterator.next();
+            if (entry.getValue().equals(player)) {
+                entry.getKey().getBlock().setType(Material.AIR);
+                iterator.remove();
+            }
+        }
     }
 
     private void teleport(final @NotNull Player player, final @NotNull Location location) {

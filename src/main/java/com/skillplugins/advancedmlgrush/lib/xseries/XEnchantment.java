@@ -19,7 +19,6 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
@@ -139,7 +138,7 @@ public enum XEnchantment {
      * If an enchantment has {@code self} as true, it means that
      * the vanilla enchantment name matches the Bukkit name.
      *
-     * @see NamespacedKey#getKey()
+     * @see Enchantment
      */
     @SuppressWarnings("deprecation")
     XEnchantment(boolean self, @Nonnull String... aliases) {
@@ -149,9 +148,20 @@ public enum XEnchantment {
         Enchantment enchantment;
         if (Data.ISFLAT) {
             String vanilla = self ? this.name() : aliases[0];
-            enchantment = Enchantment.getByKey(NamespacedKey.minecraft(vanilla.toLowerCase(Locale.ENGLISH)));
+            enchantment = getByKey(vanilla);
         } else enchantment = Enchantment.getByName(this.name());
         this.enchantment = enchantment;
+    }
+
+    private Enchantment getByKey(@Nonnull String vanilla) {
+        try {
+            Class<?> namespacedKey = Class.forName("org.bukkit.NamespacedKey");
+            Object key = namespacedKey.getMethod("minecraft", String.class)
+                    .invoke(null, vanilla.toLowerCase(Locale.ENGLISH));
+            return (Enchantment) Enchantment.class.getMethod("getByKey", namespacedKey).invoke(null, key);
+        } catch (ReflectiveOperationException ignored) {
+            return Enchantment.getByName(this.name());
+        }
     }
 
     /**

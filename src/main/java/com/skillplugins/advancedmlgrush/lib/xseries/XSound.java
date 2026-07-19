@@ -1499,7 +1499,7 @@ public enum XSound {
 
             for (XSound music : musics) {
                 Sound sound = music.parseSound();
-                if (sound != null) player.stopSound(sound);
+                if (sound != null) stopSoundSafely(player, sound);
             }
         });
     }
@@ -1618,7 +1618,15 @@ public enum XSound {
         Objects.requireNonNull(player, "Cannot stop playing sound from null player");
 
         Sound sound = this.parseSound();
-        if (sound != null) player.stopSound(sound);
+        if (sound != null) stopSoundSafely(player, sound);
+    }
+
+    private static void stopSoundSafely(@Nonnull Player player, @Nonnull Sound sound) {
+        try {
+            Player.class.getMethod("stopSound", Sound.class).invoke(player, sound);
+        } catch (ReflectiveOperationException ignored) {
+            // Stopping individual sounds is not available on Minecraft 1.8.
+        }
     }
 
     /**

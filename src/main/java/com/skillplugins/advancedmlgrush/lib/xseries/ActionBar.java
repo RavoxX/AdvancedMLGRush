@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -56,6 +57,7 @@ public final class ActionBar {
      * This should technically be available from 1.9
      */
     private static final boolean SPIGOT;
+    private static final Method SPIGOT_ACTION_BAR;
     /**
      * ChatComponentText JSON message builder.
      */
@@ -70,13 +72,14 @@ public final class ActionBar {
     private static final Object CHAT_MESSAGE_TYPE;
 
     static {
-        boolean exists = false;
+        Method actionBarMethod = null;
         try {
-            Player.Spigot.class.getDeclaredMethod("sendMessage", ChatMessageType.class, BaseComponent.class);
-            exists = true;
+            actionBarMethod = Player.Spigot.class.getDeclaredMethod(
+                    "sendMessage", ChatMessageType.class, BaseComponent[].class);
         } catch (NoClassDefFoundError | NoSuchMethodException ignored) {
         }
-        SPIGOT = exists;
+        SPIGOT_ACTION_BAR = actionBarMethod;
+        SPIGOT = actionBarMethod != null;
     }
 
     static {
@@ -148,7 +151,12 @@ public final class ActionBar {
     public static void sendActionBar(@Nonnull Player player, @Nullable String message) {
         Objects.requireNonNull(player, "Cannot send action bar to null player");
         if (SPIGOT) {
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message));
+            try {
+                SPIGOT_ACTION_BAR.invoke(player.spigot(), new Object[]{
+                        ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message)});
+            } catch (ReflectiveOperationException exception) {
+                exception.printStackTrace();
+            }
             return;
         }
 

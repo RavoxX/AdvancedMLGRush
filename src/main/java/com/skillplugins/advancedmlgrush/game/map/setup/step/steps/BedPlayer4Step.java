@@ -17,8 +17,11 @@ import com.skillplugins.advancedmlgrush.config.configs.MessageConfig;
 import com.skillplugins.advancedmlgrush.game.map.setup.step.SetupStep;
 import com.skillplugins.advancedmlgrush.util.Pair;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 @Singleton
 public class BedPlayer4Step implements SetupStep<Pair<Location, Location>> {
@@ -30,6 +33,6 @@ public class BedPlayer4Step implements SetupStep<Pair<Location, Location>> {
 
     @Override
     public Pair<Location, Location> onPerform(final @NotNull Player player) {
-        return new Pair<>(player.getLocation(), player.getTargetBlock(null, 4).getLocation());
+        return new Pair<>(player.getLocation(), player.getTargetBlock((Set<Material>) null, 4).getLocation());
     }
 }
