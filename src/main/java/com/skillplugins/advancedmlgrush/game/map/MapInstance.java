@@ -537,6 +537,7 @@ public class MapInstance implements EventHandler {
 
     public void quitMap(final @NotNull Player player) {
         ActionBar.clearActionBar(player);
+        clearBlocks(player);
         players.remove(player);
         mapInstanceManager.unregister(player);
         sqlDataCache.getSQLData(player).increaseLoses();
