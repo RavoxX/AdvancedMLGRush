@@ -39,6 +39,19 @@ public class ItemMaterialConfig extends Configurable {
     @PostConstruct
     public void initConfig() {
         super.init();
+        boolean changed = false;
+        changed |= migrateMaterial(EnumItem.GADGETS, XMaterial.CHEST, XMaterial.DIAMOND);
+        changed |= migrateMaterial(EnumItem.QUEUE_2X1, XMaterial.NETHER_STAR, XMaterial.BED);
+        changed |= migrateMaterial(EnumItem.QUEUE_4X1, XMaterial.NETHER_STAR, XMaterial.BED);
+        changed |= migrateMaterial(EnumItem.STATS_WINS, XMaterial.IRON_SWORD, XMaterial.EMERALD);
+        changed |= migrateMaterial(EnumItem.STATS_LOSES, XMaterial.COAL, XMaterial.REDSTONE);
+        changed |= migrateMaterial(EnumItem.STATS_RANKING, XMaterial.GOLD_BLOCK, XMaterial.NETHER_STAR);
+        changed |= migrateMaterial(EnumItem.STATS_KILLS, XMaterial.BOW, XMaterial.IRON_SWORD);
+        changed |= migrateMaterial(EnumItem.STATS_DEATHS, XMaterial.CHAINMAIL_CHESTPLATE, XMaterial.SKELETON_SKULL);
+        changed |= migrateMaterial(EnumItem.STATS_PLACED_BLOCKS, XMaterial.SANDSTONE, XMaterial.BRICKS);
+        if (changed) {
+            saveConfig();
+        }
     }
 
     @Override
@@ -52,7 +65,7 @@ public class ItemMaterialConfig extends Configurable {
         list.add(new Pair<>(EnumItem.CHALLENGER.getConfigPath(), XMaterial.IRON_SWORD.name()));
         list.add(new Pair<>(EnumItem.SETTINGS.getConfigPath(), XMaterial.REPEATER.name()));
         list.add(new Pair<>(EnumItem.SPECTATE.getConfigPath(), XMaterial.COMPASS.name()));
-        list.add(new Pair<>(EnumItem.GADGETS.getConfigPath(), XMaterial.CHEST.name()));
+        list.add(new Pair<>(EnumItem.GADGETS.getConfigPath(), XMaterial.DIAMOND.name()));
         list.add(new Pair<>(EnumItem.STATS.getConfigPath(), XMaterial.PLAYER_HEAD.name()));
         list.add(new Pair<>(EnumItem.PICKAXE.getConfigPath(), XMaterial.STONE_PICKAXE.name()));
         list.add(new Pair<>(EnumItem.QUEUE_LEAVE.getConfigPath(), XMaterial.BARRIER.name()));
@@ -68,16 +81,16 @@ public class ItemMaterialConfig extends Configurable {
         list.add(new Pair<>(EnumItem.SORTING_SAVE.getConfigPath(), XMaterial.LIME_DYE.name()));
         list.add(new Pair<>(EnumItem.SORTING_RESET.getConfigPath(), XMaterial.RED_DYE.name()));
         list.add(new Pair<>(EnumItem.ROUNDS.getConfigPath(), XMaterial.SLIME_BALL.name()));
-        list.add(new Pair<>(EnumItem.STATS_WINS.getConfigPath(), XMaterial.IRON_SWORD.name()));
-        list.add(new Pair<>(EnumItem.STATS_LOSES.getConfigPath(), XMaterial.COAL.name()));
+        list.add(new Pair<>(EnumItem.STATS_WINS.getConfigPath(), XMaterial.EMERALD.name()));
+        list.add(new Pair<>(EnumItem.STATS_LOSES.getConfigPath(), XMaterial.REDSTONE.name()));
         list.add(new Pair<>(EnumItem.STATS_WIN_RATE.getConfigPath(), XMaterial.DIAMOND.name()));
         list.add(new Pair<>(EnumItem.STATS_BEDS.getConfigPath(), XMaterial.BED.name()));
-        list.add(new Pair<>(EnumItem.STATS_RANKING.getConfigPath(), XMaterial.GOLD_BLOCK.name()));
-        list.add(new Pair<>(EnumItem.STATS_KILLS.getConfigPath(), XMaterial.BOW.name()));
-        list.add(new Pair<>(EnumItem.STATS_DEATHS.getConfigPath(), XMaterial.CHAINMAIL_CHESTPLATE.name()));
-        list.add(new Pair<>(EnumItem.STATS_PLACED_BLOCKS.getConfigPath(), XMaterial.SANDSTONE.name()));
-        list.add(new Pair<>(EnumItem.QUEUE_2X1.getConfigPath(), XMaterial.NETHER_STAR.name()));
-        list.add(new Pair<>(EnumItem.QUEUE_4X1.getConfigPath(), XMaterial.NETHER_STAR.name()));
+        list.add(new Pair<>(EnumItem.STATS_RANKING.getConfigPath(), XMaterial.NETHER_STAR.name()));
+        list.add(new Pair<>(EnumItem.STATS_KILLS.getConfigPath(), XMaterial.IRON_SWORD.name()));
+        list.add(new Pair<>(EnumItem.STATS_DEATHS.getConfigPath(), XMaterial.SKELETON_SKULL.name()));
+        list.add(new Pair<>(EnumItem.STATS_PLACED_BLOCKS.getConfigPath(), XMaterial.BRICKS.name()));
+        list.add(new Pair<>(EnumItem.QUEUE_2X1.getConfigPath(), XMaterial.BED.name()));
+        list.add(new Pair<>(EnumItem.QUEUE_4X1.getConfigPath(), XMaterial.BED.name()));
         list.add(new Pair<>(EnumItem.SPECTATE_LEAVE.getConfigPath(), XMaterial.MAGMA_CREAM.name()));
     }
 
@@ -87,5 +100,17 @@ public class ItemMaterialConfig extends Configurable {
 
     public Pair<Material, Integer> getMaterial(final @NotNull EnumItem enumItem) {
         return getMaterial(enumItem.getConfigPath());
+    }
+
+    private boolean migrateMaterial(final @NotNull EnumItem enumItem,
+                                    final @NotNull XMaterial oldMaterial,
+                                    final @NotNull XMaterial newMaterial) {
+        final String path = enumItem.getConfigPath();
+        final String configured = getYamlConfiguration().getString(path);
+        if (configured != null && configured.equalsIgnoreCase(oldMaterial.name())) {
+            getYamlConfiguration().set(path, newMaterial.name());
+            return true;
+        }
+        return false;
     }
 }

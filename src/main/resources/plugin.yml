@@ -1,10 +1,11 @@
-name: AdvancedMLGRush
+name: GoonRush
 main: com.skillplugins.advancedmlgrush.MLGRush
-version: 3.0.2.9
-author: SkillCode
+version: 1.0.0
+author: FuneralFlower
 website: https://skillplugins.com
 softdepend: [ PlaceholderAPI, ProtocolLib ]
 commands:
+  goonrush:
   setspawn:
   setupmap:
     aliases:
@@ -19,7 +20,9 @@ commands:
   queue:
   settings:
   spectate:
-  gadgets:
+  perks:
+    aliases:
+      - gadgets
   stats:
   statsreset:
     aliases:

@@ -12,23 +12,33 @@
 
 package com.skillplugins.advancedmlgrush.inventory.inventories;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.annotations.PostConstruct;
 import com.skillplugins.advancedmlgrush.config.configs.InventoryNameConfig;
 import com.skillplugins.advancedmlgrush.event.EventListener;
 import com.skillplugins.advancedmlgrush.inventory.AbstractInventory;
 import com.skillplugins.advancedmlgrush.item.EnumItem;
+import com.skillplugins.advancedmlgrush.item.builder.MetaType;
+import com.skillplugins.advancedmlgrush.placeholder.Placeholders;
 import com.skillplugins.advancedmlgrush.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 @Singleton
 public class StatsInventory extends AbstractInventory {
+
+    @Inject
+    private Placeholders placeholders;
 
     @PostConstruct
     public void initInventory() {
@@ -48,9 +58,9 @@ public class StatsInventory extends AbstractInventory {
     @Override
     protected Pair<Inventory, String> onCreate() {
         final String title = inventoryUtils.getInventoryName(InventoryNameConfig.STATS);
-        final Inventory inventory = Bukkit.createInventory(null, 4 * 9, title);
+        final Inventory inventory = Bukkit.createInventory(null, 5 * 9, title);
 
-        inventoryUtils.fill(inventory);
+        inventoryUtils.frame(inventory);
         return new Pair<>(inventory, title);
     }
 
@@ -58,15 +68,48 @@ public class StatsInventory extends AbstractInventory {
     protected Inventory onOpen(final @NotNull Inventory inventory, final @NotNull Player player) {
         final Optional<Player> optionalPlayer = Optional.of(player);
 
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS_WINS);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS_BEDS);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS_RANKING);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS_WIN_RATE);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS_LOSES);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS_KILLS);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS_DEATHS);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS_PLACED_BLOCKS);
+        final List<String> profileLore = new ArrayList<>(Arrays.asList(
+                " ",
+                "&7Your personal MLGrush overview",
+                " ",
+                "&8Games &7• &a%stats_wins% wins &8/ &c%stats_loses% losses"
+        ));
+        placeholders.replace(optionalPlayer, profileLore);
+        inventory.setItem(4, ibFactory.create(MetaType.SKULL_META, 3)
+                .owner(player.getName())
+                .name(placeholders.replace(optionalPlayer, "&e&l" + player.getName()))
+                .lore(profileLore)
+                .build());
+
+        setStatItem(inventory, optionalPlayer, EnumItem.STATS_WINS,
+                "&7Rounds won", "&a%stats_wins%");
+        setStatItem(inventory, optionalPlayer, EnumItem.STATS_LOSES,
+                "&7Rounds lost", "&c%stats_loses%");
+        setStatItem(inventory, optionalPlayer, EnumItem.STATS_WIN_RATE,
+                "&7Wins per defeat", "&b%stats_win_rate%");
+        setStatItem(inventory, optionalPlayer, EnumItem.STATS_BEDS,
+                "&7Enemy beds destroyed", "&e%stats_beds%");
+        setStatItem(inventory, optionalPlayer, EnumItem.STATS_RANKING,
+                "&7Position on the leaderboard", "&6#%stats_ranking%");
+        setStatItem(inventory, optionalPlayer, EnumItem.STATS_KILLS,
+                "&7Players knocked into the void", "&c%stats_kills%");
+        setStatItem(inventory, optionalPlayer, EnumItem.STATS_DEATHS,
+                "&7Times fallen into the void", "&7%stats_deaths%");
+        setStatItem(inventory, optionalPlayer, EnumItem.STATS_PLACED_BLOCKS,
+                "&7Blocks placed in rounds", "&f%stats_placed_blocks%");
         return inventory;
+    }
+
+    private void setStatItem(final @NotNull Inventory inventory, final @NotNull Optional<Player> optionalPlayer,
+                             final @NotNull EnumItem enumItem, final @NotNull String description,
+                             final @NotNull String value) {
+        final ItemStack itemStack = itemManager.getItem(optionalPlayer, enumItem);
+        final ItemMeta itemMeta = itemStack.getItemMeta();
+        final List<String> lore = new ArrayList<>(Arrays.asList(" ", description, " ", value));
+        placeholders.replace(optionalPlayer, lore);
+        itemMeta.setLore(lore);
+        itemStack.setItemMeta(itemMeta);
+        inventory.setItem(itemManager.getItemSlot(enumItem), itemStack);
     }
 
     @Override

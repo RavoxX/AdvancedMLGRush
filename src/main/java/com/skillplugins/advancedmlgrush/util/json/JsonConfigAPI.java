@@ -34,14 +34,15 @@ public class JsonConfigAPI {
 
     public void registerConfig(@NotNull JsonConfig jsonConfig, @NotNull String filePath) {
         final File file = new File(filePath);
-        fileMap.put(jsonConfig, file);
         if (file.exists()) {
             final JsonConfig config = JsonUtils.getFromFile(jsonConfig.getClass(), file);
             configMap.put(config.getClass(), config);
+            fileMap.put(config, file);
         } else {
             file.getParentFile().mkdirs();
             JsonUtils.toFile(jsonConfig, file, prettyPrint);
             configMap.put(jsonConfig.getClass(), jsonConfig);
+            fileMap.put(jsonConfig, file);
         }
     }
 

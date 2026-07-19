@@ -44,8 +44,7 @@ public class PlayerCommandPreprocessListener implements Listener {
     @EventHandler
     public void onCommand(final @NotNull PlayerCommandPreprocessEvent event) {
         final String message = event.getMessage().trim();
-        if (message.equalsIgnoreCase("/mlgrush")
-                || message.equalsIgnoreCase("/advancedmlgrush")) {
+        if (message.equalsIgnoreCase("/goonrush")) {
             final Player player = event.getPlayer();
             player.sendMessage(placeholders.replace(Optional.of(player),
                     String.format(messageConfig.getString(MessageConfig.PREFIX) + Constants.MLGRUSH_COMMAND_MESSAGE,

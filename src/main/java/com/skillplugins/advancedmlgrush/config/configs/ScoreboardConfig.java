@@ -36,6 +36,9 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     public static final String MAP_2X1_SCOREBOARD = "map_2x1_scoreboard";
     public static final String MAP_4X1_SCOREBOARD = "map_4x1_scoreboard";
     public static final String ROUND_ACTIONBAR = "round_actionbar";
+    private static final String GOONRUSH_SCOREBOARD_MIGRATED = "goonrush_scoreboard_migrated";
+    private static final String GOONRUSH_BLUE_THEME_MIGRATED = "goonrush_blue_theme_migrated";
+    private static final String GOONRUSH_GREEN_THEME_MIGRATED = "goonrush_green_theme_migrated";
 
     private final Placeholders placeholders;
 
@@ -47,6 +50,27 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     @PostConstruct
     public void initConfig() {
         super.init();
+        if (!getBoolean(GOONRUSH_SCOREBOARD_MIGRATED)) {
+            getYamlConfiguration().set(SCOREBOARD_TITLE, "&a&lGOONRUSH");
+            getYamlConfiguration().set(MAP_2X1_SCOREBOARD, createRoundScoreboard());
+            getYamlConfiguration().set(MAP_4X1_SCOREBOARD, createRoundScoreboard());
+            getYamlConfiguration().set(GOONRUSH_SCOREBOARD_MIGRATED, true);
+            saveConfig();
+        }
+        if (!getBoolean(GOONRUSH_BLUE_THEME_MIGRATED)) {
+            getYamlConfiguration().set(SCOREBOARD_TITLE, "&a&lGOONRUSH");
+            getYamlConfiguration().set(MAP_2X1_SCOREBOARD, createRoundScoreboard());
+            getYamlConfiguration().set(MAP_4X1_SCOREBOARD, createRoundScoreboard());
+            getYamlConfiguration().set(GOONRUSH_BLUE_THEME_MIGRATED, true);
+            saveConfig();
+        }
+        if (!getBoolean(GOONRUSH_GREEN_THEME_MIGRATED)) {
+            getYamlConfiguration().set(SCOREBOARD_TITLE, "&a&lGOONRUSH");
+            getYamlConfiguration().set(MAP_2X1_SCOREBOARD, createRoundScoreboard());
+            getYamlConfiguration().set(MAP_4X1_SCOREBOARD, createRoundScoreboard());
+            getYamlConfiguration().set(GOONRUSH_GREEN_THEME_MIGRATED, true);
+            saveConfig();
+        }
     }
 
     @Override
@@ -56,7 +80,7 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
 
     @Override
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
-        list.add(new Pair<>(SCOREBOARD_TITLE, "  &8» &6&lMLGRush  "));
+        list.add(new Pair<>(SCOREBOARD_TITLE, "&a&lGOONRUSH"));
         list.add(new Pair<>(ROUND_ACTIONBAR,
                 "&f%player1% &8» &f%player1_score% &8| &f%player2% &8» &f%player2_score%"));
         list.add(new Pair<>(LOBBY_SCOREBOARD, new ArrayList<>(Arrays.asList(
@@ -71,28 +95,25 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
                 "&8» &e#%stats_ranking%",
                 "&4"
         ))));
-        list.add(new Pair<>(MAP_2X1_SCOREBOARD, new ArrayList<>(Arrays.asList(
+        list.add(new Pair<>(MAP_2X1_SCOREBOARD, createRoundScoreboard()));
+        list.add(new Pair<>(MAP_4X1_SCOREBOARD, createRoundScoreboard()));
+        list.add(new Pair<>(GOONRUSH_SCOREBOARD_MIGRATED, false));
+        list.add(new Pair<>(GOONRUSH_BLUE_THEME_MIGRATED, false));
+        list.add(new Pair<>(GOONRUSH_GREEN_THEME_MIGRATED, false));
+    }
+
+    private static ArrayList<String> createRoundScoreboard() {
+        return new ArrayList<>(Arrays.asList(
+                "&8&m----------------",
+                "&7Map&8: &a%map_name%",
                 "&1",
-                "&7Map&8:",
-                "&8» &e%map_name% &7(&e%map_mode%&7)",
-                "&3",
-                "&7Scores&8:",
-                "&8» &e&l%map_score_1% &8| &e%map_player_1%",
-                "&8» &e&l%map_score_2% &8| &e%map_player_2%",
-                "&2"
-        ))));
-        list.add(new Pair<>(MAP_4X1_SCOREBOARD, new ArrayList<>(Arrays.asList(
-                "&1",
-                "&7Map&8:",
-                "&8» &e%map_name% &7(&e%map_mode%&7)",
-                "&3",
-                "&7Scores&8:",
-                "&8» &e&l%map_score_1% &8| &e%map_player_1%",
-                "&8» &e&l%map_score_2% &8| &e%map_player_2%",
-                "&8» &e&l%map_score_3% &8| &e%map_player_3%",
-                "&8» &e&l%map_score_4% &8| &e%map_player_4%",
-                "&4"
-        ))));
+                "&7No Block Remover&8: %block_remover_off_status%",
+                "&7Normal&8: %block_remover_normal_status%",
+                "&7Death Reset&8: %block_remover_death_reset_status%",
+                "&2",
+                "&8&m----------------",
+                "&f&oMLGRush-1"
+        ));
     }
 
     @Override

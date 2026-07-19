@@ -41,8 +41,6 @@ import java.util.Optional;
 public class SettingsInventory extends AbstractInventory {
 
     @Inject
-    private SortingInventory sortingInventory;
-    @Inject
     private RoundsInventory roundsInventory;
     @Inject
     private MapInventory mapInventory;
@@ -70,7 +68,6 @@ public class SettingsInventory extends AbstractInventory {
         final Inventory inventory = Bukkit.createInventory(null, 3 * 9, title);
         inventoryUtils.fill(inventory);
 
-        itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_INVENTORY_SORTING);
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_MAP);
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_ROUNDS);
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_BLOCK_REMOVER);
@@ -94,10 +91,7 @@ public class SettingsInventory extends AbstractInventory {
                 if (inventoryUtils.isOpenInventory(player, clazz)) {
                     final Optional<Player> optionalPlayer = Optional.of(player);
                     final ItemStack currentItem = event.getCurrentItem();
-                    if (itemUtils.compare(currentItem, EnumItem.SETTINGS_INVENTORY_SORTING, optionalPlayer)) {
-                        sortingInventory.open(player);
-                        soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
-                    } else if (itemUtils.compare(currentItem, EnumItem.SETTINGS_MAP, optionalPlayer)) {
+                    if (itemUtils.compare(currentItem, EnumItem.SETTINGS_MAP, optionalPlayer)) {
                         mapInventory.open(player);
                         soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
                     } else if (itemUtils.compare(currentItem, EnumItem.SETTINGS_ROUNDS, optionalPlayer)) {

@@ -59,9 +59,19 @@ public class GadgetManager {
     @PostConstruct
     public void loadGadgets() {
         final GadgetsFile gadgetsFile = gadgetFileLoader.getGadgetsFile();
+        final List<Gadget> configuredSticks = gadgetsFile.getSticks() == null
+                ? DefaultGadgets.getDefaultSticks() : gadgetsFile.getSticks();
+        final List<Gadget> configuredBlocks = gadgetsFile.getBlocks() == null
+                ? DefaultGadgets.getDefaultBlocks() : gadgetsFile.getBlocks();
 
-        sticks.addAll(gadgetsFile.getSticks() == null ? DefaultGadgets.getDefaultSticks() : gadgetsFile.getSticks());
-        blocks.addAll(gadgetsFile.getBlocks() == null ? DefaultGadgets.getDefaultBlocks() : gadgetsFile.getBlocks());
+        final boolean changed = mergeAdditionalPerks(configuredSticks, DefaultGadgets.getAdditionalSticks())
+                | mergeAdditionalPerks(configuredBlocks, DefaultGadgets.getAdditionalBlocks());
+
+        sticks.addAll(configuredSticks);
+        blocks.addAll(configuredBlocks);
+        if (changed && gadgetsFile.getSticks() != null && gadgetsFile.getBlocks() != null) {
+            gadgetFileLoader.save();
+        }
     }
 
     public ItemBuilder getGadgetAsBuilder(final @NotNull Player player, final @NotNull Gadget gadget) {
@@ -70,7 +80,7 @@ public class GadgetManager {
                 sticks.contains(gadget) ? sticks.indexOf(gadget) : blocks.contains(gadget) ? blocks.indexOf(gadget) : 0;
 
         final List<String> lore = new ArrayList<>(Arrays.asList(" ",
-                placeholders.replace(Optional.of(player), player.hasPermission(gadget.getPermission())
+                placeholders.replace(Optional.of(player), hasAccess(player, gadget)
                         || index == 0 ? gadget.getLoreUnlocked() : gadget.getLoreLocked())));
 
         return ibFactory.create(MetaType.ITEM_META, pair.getValue()).material(pair.getKey())
@@ -95,5 +105,27 @@ public class GadgetManager {
 
     public ItemBuilder getBlockAsBuilder(final @NotNull Player player) {
         return getGadgetAsBuilder(player, getBlock(player)).lore(new ArrayList<>());
+    }
+
+    public boolean hasAccess(final @NotNull Player player, final @NotNull Gadget gadget) {
+        final String permission = gadget.getPermission();
+        return permission == null
+                || permission.trim().isEmpty()
+                || permission.equalsIgnoreCase("none")
+                || player.hasPermission(permission);
+    }
+
+    private boolean mergeAdditionalPerks(final @NotNull List<Gadget> configured,
+                                         final @NotNull List<Gadget> additions) {
+        boolean changed = false;
+        for (final Gadget addition : additions) {
+            final boolean present = configured.stream().anyMatch(gadget ->
+                    gadget.getName().equalsIgnoreCase(addition.getName()));
+            if (!present) {
+                configured.add(addition);
+                changed = true;
+            }
+        }
+        return changed;
     }
 }

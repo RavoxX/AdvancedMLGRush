@@ -19,15 +19,11 @@ import com.skillplugins.advancedmlgrush.event.EventHandler;
 import com.skillplugins.advancedmlgrush.event.EventListener;
 import com.skillplugins.advancedmlgrush.event.EventListenerPriority;
 import com.skillplugins.advancedmlgrush.game.challenge.ChallengeManager;
-import com.skillplugins.advancedmlgrush.inventory.inventories.QueueInventory;
 import com.skillplugins.advancedmlgrush.item.EnumItem;
 import com.skillplugins.advancedmlgrush.item.ItemUtils;
 import com.skillplugins.advancedmlgrush.sql.data.SQLDataCache;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -39,8 +35,6 @@ public class ChallengerHandler implements EventHandler {
     @Inject
     private ItemUtils itemUtils;
     @Inject
-    private QueueInventory queueInventory;
-    @Inject
     private MessageConfig messageConfig;
     @Inject
     private SQLDataCache sqlDataCache;
@@ -49,7 +43,6 @@ public class ChallengerHandler implements EventHandler {
 
     @Override
     public void registerListeners(final @NotNull List<EventListener<?>> eventListeners) {
-        eventListeners.add(onRightClick());
         eventListeners.add(onLeftClick());
     }
 
@@ -74,25 +67,4 @@ public class ChallengerHandler implements EventHandler {
         };
     }
 
-    private EventListener<PlayerInteractEvent> onRightClick() {
-        return new EventListener<PlayerInteractEvent>(PlayerInteractEvent.class, EventListenerPriority.MEDIUM) {
-            @Override
-            protected void onEvent(final @NotNull PlayerInteractEvent event) {
-                if (event.getAction() == Action.RIGHT_CLICK_AIR
-                        || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-
-                    final Player player = event.getPlayer();
-                    final ItemStack clickedItem = player.getItemInHand();
-
-                    if (itemUtils.compare(clickedItem, EnumItem.CHALLENGER, Optional.of(player))) {
-                        if (!sqlDataCache.isLoaded(player)) {
-                            player.sendMessage(messageConfig.getWithPrefix(Optional.of(player), MessageConfig.LOADING_DATA));
-                        } else {
-                            queueInventory.open(player);
-                        }
-                    }
-                }
-            }
-        };
-    }
 }

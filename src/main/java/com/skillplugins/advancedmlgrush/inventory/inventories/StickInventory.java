@@ -77,7 +77,7 @@ public class StickInventory extends MultiPageInventory {
             final Gadget gadget = (Gadget) optional.get();
             final int index = gadgetManager.getSticks().indexOf(gadget);
 
-            if (player.hasPermission(gadget.getPermission())
+            if (gadgetManager.hasAccess(player, gadget)
                     || index == 0) {
                 final CachedSQLData cachedSQLData = sqlDataCache.getSQLData(player);
                 cachedSQLData.setGadgetsStick(index);

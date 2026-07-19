@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.config.configs.ScoreboardConfig;
 import com.skillplugins.advancedmlgrush.event.events.ScoreboardUpdateEvent;
+import com.skillplugins.advancedmlgrush.game.map.BlockRemover;
 import com.skillplugins.advancedmlgrush.game.map.MapInstance;
 import com.skillplugins.advancedmlgrush.game.map.MapInstanceManager;
 import com.skillplugins.advancedmlgrush.lib.fastboard.FastBoard;
@@ -80,6 +81,7 @@ public class ScoreboardManager implements Registrable {
             content.addAll(scoreboardConfig.getArrayList(ScoreboardConfig.LOBBY_SCOREBOARD));
         }
         placeholders.replace(optionalPlayer, content);
+        optionalMapInstance.ifPresent(mapInstance -> replaceBlockRemoverStatus(content, mapInstance.getBlockRemover()));
 
         final ScoreboardUpdateEvent scoreboardUpdateEvent = new ScoreboardUpdateEvent(player, content);
         Bukkit.getPluginManager().callEvent(scoreboardUpdateEvent);
@@ -88,6 +90,20 @@ public class ScoreboardManager implements Registrable {
             scoreboard.updateTitle(scoreboardConfig.getString(optionalPlayer, ScoreboardConfig.SCOREBOARD_TITLE));
             scoreboard.updateLines(scoreboardUpdateEvent.getScoreboardContent());
         }
+    }
+
+    private void replaceBlockRemoverStatus(final @NotNull List<String> content,
+                                           final @NotNull BlockRemover activeMode) {
+        for (int i = 0; i < content.size(); i++) {
+            content.set(i, content.get(i)
+                    .replace("%block_remover_off_status%", status(activeMode == BlockRemover.OFF))
+                    .replace("%block_remover_normal_status%", status(activeMode == BlockRemover.NORMAL))
+                    .replace("%block_remover_death_reset_status%", status(activeMode == BlockRemover.DEATH_RESET)));
+        }
+    }
+
+    private String status(final boolean active) {
+        return active ? "\u00a7a\u2714" : "\u00a7c\u2718";
     }
 
 }

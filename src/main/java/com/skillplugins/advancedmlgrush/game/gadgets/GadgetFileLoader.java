@@ -38,4 +38,8 @@ public class GadgetFileLoader {
         jsonConfigAPI.registerConfig(new GadgetsFile(), Constants.GADGETS_CONFIG_PATH);
         gadgetsFile = jsonConfigAPI.getConfig(GadgetsFile.class);
     }
+
+    public void save() {
+        jsonConfigAPI.saveConfig(gadgetsFile);
+    }
 }

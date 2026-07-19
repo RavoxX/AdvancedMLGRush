@@ -51,6 +51,14 @@ public class InventoryNameConfig extends Configurable implements Replaceable {
     @PostConstruct
     public void initConfig() {
         super.init();
+        boolean changed = false;
+        changed |= migrateName(GADGETS, "&8» &eGadgets", "&8» &bPerks");
+        changed |= migrateName(STICK, "&8» &eStick", "&8» &bStick Perks");
+        changed |= migrateName(BLOCKS, "&8» &eBlocks", "&8» &bBlock Perks");
+        changed |= migrateName(STATS, "&8» &eStats", "&8» &6Player Profile");
+        if (changed) {
+            saveConfig();
+        }
     }
 
     @Override
@@ -66,15 +74,25 @@ public class InventoryNameConfig extends Configurable implements Replaceable {
     @Override
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
         list.add(new Pair<>(SETTINGS, "&8» &eSettings"));
-        list.add(new Pair<>(GADGETS, "&8» &eGadgets"));
-        list.add(new Pair<>(STICK, "&8» &eStick"));
-        list.add(new Pair<>(BLOCKS, "&8» &eBlocks"));
+        list.add(new Pair<>(GADGETS, "&8» &bPerks"));
+        list.add(new Pair<>(STICK, "&8» &bStick Perks"));
+        list.add(new Pair<>(BLOCKS, "&8» &bBlock Perks"));
         list.add(new Pair<>(INVENTORY_SORTING, "&8» &eInventory Sorting"));
         list.add(new Pair<>(MAP, "&8» &eMap"));
         list.add(new Pair<>(ROUNDS, "&8» &eRounds"));
         list.add(new Pair<>(BLOCK_REMOVER, "&8» &eBlock Remover"));
-        list.add(new Pair<>(STATS, "&8» &eStats"));
+        list.add(new Pair<>(STATS, "&8» &6Player Profile"));
         list.add(new Pair<>(QUEUE, "&8» &eQueue"));
         list.add(new Pair<>(SPECTATE, "&8» &eSpectate"));
+    }
+
+    private boolean migrateName(final @NotNull String path, final @NotNull String oldName,
+                                final @NotNull String newName) {
+        final String configured = getYamlConfiguration().getString(path);
+        if (configured != null && oldName.equals(configured.replace("\u00c2", ""))) {
+            getYamlConfiguration().set(path, newName);
+            return true;
+        }
+        return false;
     }
 }

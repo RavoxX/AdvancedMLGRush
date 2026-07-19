@@ -130,7 +130,7 @@ public class BlockRemoverInventory extends AbstractInventory {
                 lore.add("\u00a77Placed blocks stay until the game ends.");
                 break;
             case NORMAL:
-                lore.add("\u00a77Blocks disappear after \u00a7e"
+                lore.add("\u00a77Blocks disappear after \u00a7a"
                         + Math.max(0, mainConfig.getInt(MainConfig.BLOCK_REMOVER_DELAY_SECONDS)) + " seconds\u00a77.");
                 break;
             case DEATH_RESET:

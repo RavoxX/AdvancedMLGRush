@@ -49,10 +49,10 @@ public class PlayerDataLoadListener implements Listener {
         final Player player = event.getPlayer();
         final CachedSQLData cachedSQLData = event.getCachedSQLData();
 
-        if (!player.hasPermission(gadgetManager.getStick(player).getPermission())) {
+        if (!gadgetManager.hasAccess(player, gadgetManager.getStick(player))) {
             cachedSQLData.setGadgetsStick(0);
         }
-        if (!player.hasPermission(gadgetManager.getBlock(player).getPermission())) {
+        if (!gadgetManager.hasAccess(player, gadgetManager.getBlock(player))) {
             cachedSQLData.setGadgetsBlocks(0);
         }
 

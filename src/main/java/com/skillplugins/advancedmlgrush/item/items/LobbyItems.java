@@ -38,9 +38,7 @@ public class LobbyItems {
 
         itemManager.setItem(inventory, optionalPlayer, EnumItem.CHALLENGER);
         itemManager.setItem(inventory, optionalPlayer, EnumItem.SETTINGS);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.SPECTATE);
         itemManager.setItem(inventory, optionalPlayer, EnumItem.GADGETS);
-        itemManager.setItem(inventory, optionalPlayer, EnumItem.STATS);
     }
 
     public void setQueueItems(final @NotNull Player player) {

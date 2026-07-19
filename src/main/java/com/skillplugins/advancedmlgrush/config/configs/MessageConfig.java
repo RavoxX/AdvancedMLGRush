@@ -23,6 +23,7 @@ import com.skillplugins.advancedmlgrush.util.Pair;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,6 +91,7 @@ public class MessageConfig extends Configurable implements Replaceable {
     @PostConstruct
     public void initConfig() {
         super.init();
+        migrateBranding();
     }
 
     @Override
@@ -108,7 +110,7 @@ public class MessageConfig extends Configurable implements Replaceable {
 
     @Override
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
-        list.add(new Pair<>(PREFIX, "&8» &6&lAdvancedMLGRush &8| &7"));
+        list.add(new Pair<>(PREFIX, "&8» &6&lGoonRush &8| &7"));
         list.add(new Pair<>(NO_PERMISSION, "&cYou don't have permission to execute this command!"));
         list.add(new Pair<>(QUEUE_JOIN, "&aYou entered the queue."));
         list.add(new Pair<>(QUEUE_LEAVE, "&aYou left the queue."));
@@ -156,6 +158,48 @@ public class MessageConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(SETUP_BED_PLAYER_3, "&7Stand on the lower part of the third player's bed and look at the upper part. Type '&enext&7'."));
         list.add(new Pair<>(SETUP_BED_PLAYER_4, "&7Stand on the lower part of the fourth player's bed and look at the upper part. Type '&enext&7'."));
         list.add(new Pair<>(SETUP_FINISH, "&aThe setup has been finished!"));
+    }
+
+    private void migrateBranding() {
+        boolean changed = false;
+
+        for (final String key : getYamlConfiguration().getKeys(true)) {
+            final Object value = getYamlConfiguration().get(key);
+            if (value instanceof String) {
+                final String oldValue = (String) value;
+                final String newValue = replaceBranding(oldValue);
+                if (!oldValue.equals(newValue)) {
+                    getYamlConfiguration().set(key, newValue);
+                    changed = true;
+                }
+            } else if (value instanceof List) {
+                final List<?> oldValues = (List<?>) value;
+                final List<Object> newValues = new ArrayList<>(oldValues.size());
+                boolean listChanged = false;
+                for (final Object entry : oldValues) {
+                    if (entry instanceof String) {
+                        final String oldEntry = (String) entry;
+                        final String newEntry = replaceBranding(oldEntry);
+                        newValues.add(newEntry);
+                        listChanged |= !oldEntry.equals(newEntry);
+                    } else {
+                        newValues.add(entry);
+                    }
+                }
+                if (listChanged) {
+                    getYamlConfiguration().set(key, newValues);
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            saveConfig();
+        }
+    }
+
+    private String replaceBranding(final @NotNull String value) {
+        return value.replaceAll("(?i)AdvancedMLGrush", "GoonRush");
     }
 
 }

@@ -23,7 +23,30 @@ public final class TextUtils {
     public static String colorize(final @NotNull String input) {
         // Older builds compiled UTF-8 source as Windows-1252 and could persist
         // an extra \u00c2 before section signs and arrow characters in YAML files.
-        final String normalized = input.replace("\u00c2", "");
+        String normalized = input.replace("\u00c2", "")
+                .replaceAll("(?i)&[16eb]", "&a")
+                .replaceAll("(?i)\u00a7[16eb]", "\u00a7a");
+
+        // Decorative symbols always use dark gray, independent of the configured
+        // color immediately before them.
+        normalized = normalized.replaceAll(
+                "(?i)(?:&[0-9a-fk-or]|\u00a7[0-9a-fk-or])+(?=[»«|•])", "&8");
+        normalized = normalized.replaceAll(
+                "(?i)(?<!&8)(?<!\u00a78)(?=[»«|•])", "&8");
+
+        // Ranking hashes are gray while the following value returns to the
+        // dark-blue theme color.
+        normalized = normalized.replaceAll(
+                "(?i)(?:&[0-9a-fk-or]|\u00a7[0-9a-fk-or])+(?=#)", "&8");
+        normalized = normalized.replaceAll(
+                "(?i)(?<!&8)(?<!\u00a78)(?=#)", "&8");
+        normalized = normalized.replace("#", "#&a");
+
+        // Plus/minus navigation buttons consist only of the symbol itself.
+        if (normalized.matches("(?i)(?:&[0-9a-fk-or]|\u00a7[0-9a-fk-or])*[+-]")) {
+            normalized = "&8" + normalized.substring(normalized.length() - 1);
+        }
+
         return ChatColor.translateAlternateColorCodes('&', normalized);
     }
 }

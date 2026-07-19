@@ -78,7 +78,7 @@ public class BlocksInventory extends MultiPageInventory {
             final Gadget gadget = (Gadget) optional.get();
             final int index = gadgetManager.getBlocks().indexOf(gadget);
 
-            if (player.hasPermission(gadget.getPermission())
+            if (gadgetManager.hasAccess(player, gadget)
                     || index == 0) {
                 final CachedSQLData cachedSQLData = sqlDataCache.getSQLData(player);
                 cachedSQLData.setGadgetsBlocks(index);
