@@ -617,7 +617,10 @@ public class MapInstance implements EventHandler {
 
     private void updateActionBar() {
         players.keySet().forEach(viewer -> {
-            String message = scoreboardConfig.getString(Optional.of(viewer), ScoreboardConfig.ROUND_ACTIONBAR);
+            final String actionBarPath = mapData.getMapType() == MapType.M4x1
+                    ? ScoreboardConfig.ROUND_ACTIONBAR_4X1
+                    : ScoreboardConfig.ROUND_ACTIONBAR;
+            String message = scoreboardConfig.getString(Optional.of(viewer), actionBarPath);
             for (int index = 0; index < 4; index++) {
                 final int number = index + 1;
                 final Optional<Player> participant = getPlayer(index);

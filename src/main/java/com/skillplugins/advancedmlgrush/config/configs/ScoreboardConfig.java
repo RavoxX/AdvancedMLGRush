@@ -36,6 +36,7 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     public static final String MAP_2X1_SCOREBOARD = "map_2x1_scoreboard";
     public static final String MAP_4X1_SCOREBOARD = "map_4x1_scoreboard";
     public static final String ROUND_ACTIONBAR = "round_actionbar";
+    public static final String ROUND_ACTIONBAR_4X1 = "round_actionbar_4x1";
     private static final String GOONRUSH_SCOREBOARD_MIGRATED = "goonrush_scoreboard_migrated";
     private static final String GOONRUSH_BLUE_THEME_MIGRATED = "goonrush_blue_theme_migrated";
     private static final String GOONRUSH_GREEN_THEME_MIGRATED = "goonrush_green_theme_migrated";
@@ -96,6 +97,7 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
         list.add(new Pair<>(SCOREBOARD_TITLE, "&c&lGOONRUSH"));
         list.add(new Pair<>(ROUND_ACTIONBAR, createRoundActionbar()));
+        list.add(new Pair<>(ROUND_ACTIONBAR_4X1, createRoundActionbar4x1()));
         list.add(new Pair<>(LOBBY_SCOREBOARD, new ArrayList<>(Arrays.asList(
                 "&1",
                 "&7Wins&8:",
@@ -119,6 +121,11 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
 
     private static String createRoundActionbar() {
         return "&c%player1% &8» &c%player1_score% &8| &c%player2% &8» &c%player2_score%";
+    }
+
+    private static String createRoundActionbar4x1() {
+        return "&c%player1% &8» &c%player1_score% &8| &c%player2% &8» &c%player2_score%"
+                + " &8| &c%player3% &8» &c%player3_score% &8| &c%player4% &8» &c%player4_score%";
     }
 
     private static ArrayList<String> createRoundScoreboard() {
