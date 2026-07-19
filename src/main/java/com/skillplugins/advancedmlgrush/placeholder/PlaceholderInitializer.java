@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.*;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.map.*;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.settings.MapPlaceholder;
+import com.skillplugins.advancedmlgrush.placeholder.placeholders.settings.BlockRemoverPlaceholder;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.settings.RoundsPlaceholder;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.stats.*;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.stats.ranking.*;
@@ -38,6 +39,7 @@ public class PlaceholderInitializer implements Initializer {
     @Override
     public void init(final @NotNull Injector injector) {
         placeholderManager.registerPlaceholder(injector.getInstance(RoundsPlaceholder.class));
+        placeholderManager.registerPlaceholder(injector.getInstance(BlockRemoverPlaceholder.class));
         placeholderManager.registerPlaceholder(injector.getInstance(PlayerPlaceholder.class));
         placeholderManager.registerPlaceholder(injector.getInstance(WinsPlaceholder.class));
         placeholderManager.registerPlaceholder(injector.getInstance(BedsPlaceholder.class));

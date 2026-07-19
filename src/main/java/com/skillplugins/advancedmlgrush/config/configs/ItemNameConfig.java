@@ -72,6 +72,10 @@ public class ItemNameConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(EnumItem.SETTINGS_INVENTORY_SORTING.getConfigPath(), "&8» &eInventory Sorting"));
         list.add(new Pair<>(EnumItem.SETTINGS_MAP.getConfigPath(), "&8» &eMap"));
         list.add(new Pair<>(EnumItem.SETTINGS_ROUNDS.getConfigPath(), "&8» &eRounds"));
+        list.add(new Pair<>(EnumItem.SETTINGS_BLOCK_REMOVER.getConfigPath(), "&8» &eBlock Remover &8| &e&l%settings_block_remover%"));
+        list.add(new Pair<>(EnumItem.BLOCK_REMOVER_OFF.getConfigPath(), "&8» &cOff"));
+        list.add(new Pair<>(EnumItem.BLOCK_REMOVER_NORMAL.getConfigPath(), "&8» &eNormal"));
+        list.add(new Pair<>(EnumItem.BLOCK_REMOVER_DEATH_RESET.getConfigPath(), "&8» &dDeath Reset"));
         list.add(new Pair<>(EnumItem.GADGETS_STICK.getConfigPath(), "&8» &eStick"));
         list.add(new Pair<>(EnumItem.GADGETS_BLOCKS.getConfigPath(), "&8» &eBlocks"));
         list.add(new Pair<>(EnumItem.SORTING_SAVE.getConfigPath(), "&8» &aSave"));

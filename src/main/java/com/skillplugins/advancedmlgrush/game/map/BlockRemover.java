@@ -14,24 +14,37 @@ package com.skillplugins.advancedmlgrush.game.map;
 
 public enum BlockRemover {
 
-    ROUND_RESET("Round Reset"),
-    DEATH_RESET("Death Reset");
+    OFF(0, "Off"),
+    NORMAL(1, "Normal"),
+    DEATH_RESET(2, "Death Reset");
 
-    private final String configName;
+    private final int id;
+    private final String displayName;
 
-    BlockRemover(final String configName) {
-        this.configName = configName;
+    BlockRemover(final int id, final String displayName) {
+        this.id = id;
+        this.displayName = displayName;
     }
 
-    public static BlockRemover fromConfig(final String value) {
-        if (value != null) {
-            final String normalizedValue = value.trim().replace('_', ' ').replace('-', ' ');
-            for (final BlockRemover blockRemover : values()) {
-                if (blockRemover.configName.equalsIgnoreCase(normalizedValue)) {
-                    return blockRemover;
-                }
+    public int getId() {
+        return id;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public BlockRemover next() {
+        final BlockRemover[] modes = values();
+        return modes[(ordinal() + 1) % modes.length];
+    }
+
+    public static BlockRemover fromId(final int id) {
+        for (final BlockRemover blockRemover : values()) {
+            if (blockRemover.id == id) {
+                return blockRemover;
             }
         }
-        return ROUND_RESET;
+        return NORMAL;
     }
 }

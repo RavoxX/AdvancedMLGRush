@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.annotations.PostConstruct;
 import com.skillplugins.advancedmlgrush.placeholder.papi.PAPIExpansion;
 import com.skillplugins.advancedmlgrush.placeholder.papi.PAPIPlaceholders;
+import com.skillplugins.advancedmlgrush.util.TextUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -67,7 +68,7 @@ public class Placeholders {
     }
 
     public String replaceColors(final @NotNull String input) {
-        return input.replace("&", "§");
+        return TextUtils.colorize(input);
     }
 
     private String replaceBuiltinPlaceholders(final @NotNull Optional<Player> optionalPlayer, final @NotNull String input) {

@@ -14,7 +14,7 @@ package com.skillplugins.advancedmlgrush.listener.listeners;
 
 import com.google.inject.Inject;
 import com.skillplugins.advancedmlgrush.event.EventManager;
-import com.skillplugins.advancedmlgrush.game.buildmode.BuildModeManager;
+import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
@@ -24,18 +24,15 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerArmorStandManipulateListener implements Listener {
 
     private final EventManager eventManager;
-    private final BuildModeManager buildModeManager;
 
     @Inject
-    public PlayerArmorStandManipulateListener(final @NotNull EventManager eventManager,
-                                              final @NotNull BuildModeManager buildModeManager) {
+    public PlayerArmorStandManipulateListener(final @NotNull EventManager eventManager) {
         this.eventManager = eventManager;
-        this.buildModeManager = buildModeManager;
     }
 
     @EventHandler
     public void onClick(final @NotNull PlayerArmorStandManipulateEvent event) {
-        if (!buildModeManager.isInBuildMode(event.getPlayer())) {
+        if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
             event.setCancelled(true);
         }
         eventManager.callEvent(event);

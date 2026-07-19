@@ -15,6 +15,7 @@ package com.skillplugins.advancedmlgrush.config;
 import com.google.inject.Inject;
 import com.skillplugins.advancedmlgrush.exception.ExceptionHandler;
 import com.skillplugins.advancedmlgrush.util.Pair;
+import com.skillplugins.advancedmlgrush.util.TextUtils;
 import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +62,7 @@ public abstract class Configurable implements ConfigData {
 
     @Override
     public String getString(final @NotNull String path) {
-        return Optional.ofNullable(yamlConfiguration.getString(path)).orElse("null").replace("&", "§");
+        return TextUtils.colorize(Optional.ofNullable(yamlConfiguration.getString(path)).orElse("null"));
     }
 
     @Override

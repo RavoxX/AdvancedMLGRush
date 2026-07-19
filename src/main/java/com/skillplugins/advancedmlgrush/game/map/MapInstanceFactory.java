@@ -21,6 +21,7 @@ public interface MapInstanceFactory {
     MapInstance create(final @NotNull MapTemplate mapTemplate,
                        final @NotNull MapData mapData,
                        final @NotNull BiMap<Player, Integer> players,
-                       final int rounds);
+                       final int rounds,
+                       final @NotNull BlockRemover blockRemover);
 
 }

@@ -19,16 +19,21 @@ import com.skillplugins.advancedmlgrush.config.configs.InventoryNameConfig;
 import com.skillplugins.advancedmlgrush.config.configs.SoundConfig;
 import com.skillplugins.advancedmlgrush.event.EventListener;
 import com.skillplugins.advancedmlgrush.event.EventListenerPriority;
+import com.skillplugins.advancedmlgrush.game.map.BlockRemover;
 import com.skillplugins.advancedmlgrush.inventory.AbstractInventory;
 import com.skillplugins.advancedmlgrush.item.EnumItem;
+import com.skillplugins.advancedmlgrush.sql.data.CachedSQLData;
+import com.skillplugins.advancedmlgrush.sql.data.SQLDataCache;
 import com.skillplugins.advancedmlgrush.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +46,8 @@ public class SettingsInventory extends AbstractInventory {
     private RoundsInventory roundsInventory;
     @Inject
     private MapInventory mapInventory;
+    @Inject
+    private SQLDataCache sqlDataCache;
 
     @PostConstruct
     public void initInventory() {
@@ -49,7 +56,7 @@ public class SettingsInventory extends AbstractInventory {
 
     @Override
     protected boolean cloneOnOpen() {
-        return false;
+        return true;
     }
 
     @Override
@@ -66,12 +73,14 @@ public class SettingsInventory extends AbstractInventory {
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_INVENTORY_SORTING);
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_MAP);
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_ROUNDS);
+        itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_BLOCK_REMOVER);
 
         return new Pair<>(inventory, title);
     }
 
     @Override
     protected Inventory onOpen(final @NotNull Inventory inventory, final @NotNull Player player) {
+        setBlockRemoverItem(inventory, player);
         return inventory;
     }
 
@@ -94,10 +103,34 @@ public class SettingsInventory extends AbstractInventory {
                     } else if (itemUtils.compare(currentItem, EnumItem.SETTINGS_ROUNDS, optionalPlayer)) {
                         roundsInventory.open(player);
                         soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
+                    } else if (itemUtils.compare(currentItem, EnumItem.SETTINGS_BLOCK_REMOVER, optionalPlayer)) {
+                        if (sqlDataCache.isLoaded(player)) {
+                            final CachedSQLData data = sqlDataCache.getSQLData(player);
+                            final BlockRemover next = BlockRemover.fromId(data.getSettingsBlockRemover()).next();
+                            data.setSettingsBlockRemover(next.getId());
+                            setBlockRemoverItem(event.getInventory(), player);
+                            soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
+                        }
                     }
                 }
             }
         });
         return eventListeners;
+    }
+
+    private void setBlockRemoverItem(final @NotNull Inventory inventory, final @NotNull Player player) {
+        final BlockRemover selected = BlockRemover.fromId(
+                sqlDataCache.getSQLData(player).getSettingsBlockRemover());
+        final ItemStack itemStack = itemManager.getItem(Optional.of(player), EnumItem.SETTINGS_BLOCK_REMOVER);
+        final ItemMeta itemMeta = itemStack.getItemMeta();
+        final List<String> lore = new ArrayList<>();
+
+        for (final BlockRemover mode : BlockRemover.values()) {
+            lore.add((mode == selected ? "\u00a7a" : "\u00a77") + mode.getDisplayName());
+        }
+
+        itemMeta.setLore(lore);
+        itemStack.setItemMeta(itemMeta);
+        inventory.setItem(itemManager.getItemSlot(EnumItem.SETTINGS_BLOCK_REMOVER), itemStack);
     }
 }

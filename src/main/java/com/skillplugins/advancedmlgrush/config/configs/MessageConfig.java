@@ -31,8 +31,6 @@ public class MessageConfig extends Configurable implements Replaceable {
 
     public static final String PREFIX = "prefix";
     public static final String NO_PERMISSION = "no_permission";
-    public static final String BUILD_MODE_ON = "build_mode_on";
-    public static final String BUILD_MODE_OFF = "build_mode_off";
     public static final String QUEUE_JOIN = "queue_join";
     public static final String QUEUE_LEAVE = "queue_leave";
     public static final String LOADING_DATA = "loading_data";
@@ -112,8 +110,6 @@ public class MessageConfig extends Configurable implements Replaceable {
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
         list.add(new Pair<>(PREFIX, "&8» &6&lAdvancedMLGRush &8| &7"));
         list.add(new Pair<>(NO_PERMISSION, "&cYou don't have permission to execute this command!"));
-        list.add(new Pair<>(BUILD_MODE_ON, "&aYou can build now."));
-        list.add(new Pair<>(BUILD_MODE_OFF, "&cYou can no longer build now."));
         list.add(new Pair<>(QUEUE_JOIN, "&aYou entered the queue."));
         list.add(new Pair<>(QUEUE_LEAVE, "&aYou left the queue."));
         list.add(new Pair<>(LOADING_DATA, "&cYour data is being loaded, please wait."));

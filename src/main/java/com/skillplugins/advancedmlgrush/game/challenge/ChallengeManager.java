@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.config.configs.MessageConfig;
 import com.skillplugins.advancedmlgrush.game.map.MapInstanceManager;
+import com.skillplugins.advancedmlgrush.game.map.BlockRemover;
 import com.skillplugins.advancedmlgrush.game.map.MapManager;
 import com.skillplugins.advancedmlgrush.game.map.MapTemplate;
 import com.skillplugins.advancedmlgrush.item.items.LobbyItems;
@@ -59,7 +60,8 @@ public class ChallengeManager implements Registrable {
         final Set<Map.Entry<Player, List<Player>>> entries = challengeMap.entrySet();
         for (final Map.Entry<Player, List<Player>> entry : entries) {
             final List<Player> list = entry.getValue();
-            if (list.contains(challenger)) {
+            if (entry.getKey().equals(challenged)
+                    && list.contains(challenger)) {
                 challenger.getInventory().clear();
                 challenged.getInventory().clear();
 
@@ -68,6 +70,8 @@ public class ChallengeManager implements Registrable {
 
                 final Optional<MapTemplate> optional = mapManager.getPlayerMap(challenged);
                 final int rounds = sqlDataCache.getSQLData(challenged).getSettingsRounds();
+                final BlockRemover blockRemover = BlockRemover.fromId(
+                        sqlDataCache.getSQLData(challenged).getSettingsBlockRemover());
 
                 if (!optional.isPresent()) {
                     challenger.sendMessage(messageConfig.getWithPrefix(Optional.of(challenger), MessageConfig.ERROR));
@@ -78,7 +82,7 @@ public class ChallengeManager implements Registrable {
                 } else {
                     loadingPlayers.add(challenger);
                     loadingPlayers.add(challenged);
-                    optional.get().createInstance(Arrays.asList(challenged, challenger), rounds, () -> {
+                    optional.get().createInstance(Arrays.asList(challenged, challenger), rounds, blockRemover, () -> {
                         loadingPlayers.remove(challenged);
                         loadingPlayers.remove(challenger);
                     });

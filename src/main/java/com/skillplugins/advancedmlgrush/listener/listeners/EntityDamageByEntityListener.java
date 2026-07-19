@@ -15,7 +15,7 @@ package com.skillplugins.advancedmlgrush.listener.listeners;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.event.EventManager;
-import com.skillplugins.advancedmlgrush.game.buildmode.BuildModeManager;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,13 +25,10 @@ import org.jetbrains.annotations.NotNull;
 @Singleton
 public class EntityDamageByEntityListener implements Listener {
 
-    private final BuildModeManager buildModeManager;
     private final EventManager eventManager;
 
     @Inject
-    public EntityDamageByEntityListener(final @NotNull BuildModeManager buildModeManager,
-                                        final @NotNull EventManager eventManager) {
-        this.buildModeManager = buildModeManager;
+    public EntityDamageByEntityListener(final @NotNull EventManager eventManager) {
         this.eventManager = eventManager;
     }
 
@@ -39,7 +36,7 @@ public class EntityDamageByEntityListener implements Listener {
     public void onDamage(final @NotNull EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player) {
             final Player player = (Player) event.getDamager();
-            event.setCancelled(!buildModeManager.isInBuildMode(player));
+            event.setCancelled(player.getGameMode() != GameMode.CREATIVE);
         } else {
             event.setCancelled(true);
         }

@@ -5,9 +5,6 @@ author: SkillCode
 website: https://skillplugins.com
 softdepend: [ PlaceholderAPI, ProtocolLib ]
 commands:
-  build:
-    aliases:
-      - buildmode
   setspawn:
   setupmap:
     aliases:

@@ -36,6 +36,7 @@ public class InventoryNameConfig extends Configurable implements Replaceable {
     public static final String INVENTORY_SORTING = "inventory_sorting";
     public static final String MAP = "map";
     public static final String ROUNDS = "rounds";
+    public static final String BLOCK_REMOVER = "block_remover";
     public static final String STATS = "stats";
     public static final String QUEUE = "queue";
     public static final String SPECTATE = "spectate";
@@ -71,6 +72,7 @@ public class InventoryNameConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(INVENTORY_SORTING, "&8» &eInventory Sorting"));
         list.add(new Pair<>(MAP, "&8» &eMap"));
         list.add(new Pair<>(ROUNDS, "&8» &eRounds"));
+        list.add(new Pair<>(BLOCK_REMOVER, "&8» &eBlock Remover"));
         list.add(new Pair<>(STATS, "&8» &eStats"));
         list.add(new Pair<>(QUEUE, "&8» &eQueue"));
         list.add(new Pair<>(SPECTATE, "&8» &eSpectate"));

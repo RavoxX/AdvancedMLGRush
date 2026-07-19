@@ -72,21 +72,22 @@ public class MLGDataSaver extends DataSaver {
                             "settings_pickaxe_slot = '%3$s', " +
                             "settings_map = '%4$s', " +
                             "settings_rounds = '%5$s', " +
-                            "gadgets_stick = '%6$s', " +
-                            "gadgets_blocks = '%7$s', " +
-                            "stats_wins = '%8$s', " +
-                            "stats_loses = '%9$s', " +
-                            "stats_beds = '%10$s', " +
-                            "stats_kills = '%11$s', " +
-                            "stats_deaths = '%12$s', " +
-                            "stats_placed_blocks = '%13$s' " +
+                            "settings_block_remover = '%6$s', " +
+                            "gadgets_stick = '%7$s', " +
+                            "gadgets_blocks = '%8$s', " +
+                            "stats_wins = '%9$s', " +
+                            "stats_loses = '%10$s', " +
+                            "stats_beds = '%11$s', " +
+                            "stats_kills = '%12$s', " +
+                            "stats_deaths = '%13$s', " +
+                            "stats_placed_blocks = '%14$s' " +
                             (isOfflineMode
-                                    ? "WHERE player_name = '%14$s';"
-                                    : "WHERE player_uuid = '%14$s';"),
+                                    ? "WHERE player_name = '%15$s';"
+                                    : "WHERE player_uuid = '%15$s';"),
                     cachedSQLData.getSettingsStickSlot(), cachedSQLData.getSettingsBlockSlot(),
                     cachedSQLData.getSettingsPickaxeSlot(), cachedSQLData.getSettingsMap(),
-                    cachedSQLData.getSettingsRounds(), cachedSQLData.getGadgetsStick(),
-                    cachedSQLData.getGadgetsBlocks(), cachedSQLData.getStatsWins(),
+                    cachedSQLData.getSettingsRounds(), cachedSQLData.getSettingsBlockRemover(),
+                    cachedSQLData.getGadgetsStick(), cachedSQLData.getGadgetsBlocks(), cachedSQLData.getStatsWins(),
                     cachedSQLData.getStatsLoses(), cachedSQLData.getStatsBeds(),
                     cachedSQLData.getStatsKills(), cachedSQLData.getStatsDeaths(),
                     cachedSQLData.getStatsPlacedBlocks(),
@@ -176,6 +177,7 @@ public class MLGDataSaver extends DataSaver {
                 "settings_pickaxe_slot TINYINT NOT NULL DEFAULT 8, " +
                 "settings_map SMALLINT NOT NULL DEFAULT -1, " +
                 "settings_rounds TINYINT NOT NULL DEFAULT 5, " +
+                "settings_block_remover TINYINT NOT NULL DEFAULT 1, " +
                 "gadgets_stick SMALLINT NOT NULL DEFAULT 0, " +
                 "gadgets_blocks SMALLINT NOT NULL DEFAULT 0, " +
                 "stats_wins INT NOT NULL DEFAULT 0, " +
@@ -196,6 +198,7 @@ public class MLGDataSaver extends DataSaver {
         columns.add(new Pair<>("settings_pickaxe_slot", "TINYINT NOT NULL DEFAULT 8"));
         columns.add(new Pair<>("settings_map", "SMALLINT NOT NULL DEFAULT -1"));
         columns.add(new Pair<>("settings_rounds", "TINYINT NOT NULL DEFAULT 5"));
+        columns.add(new Pair<>("settings_block_remover", "TINYINT NOT NULL DEFAULT 1"));
         columns.add(new Pair<>("gadgets_stick", "SMALLINT NOT NULL DEFAULT 0"));
         columns.add(new Pair<>("gadgets_blocks", "SMALLINT NOT NULL DEFAULT 0"));
         columns.add(new Pair<>("stats_wins", "INT NOT NULL DEFAULT 0"));
@@ -286,6 +289,7 @@ public class MLGDataSaver extends DataSaver {
                         cachedSQLData.setSettingsPickaxeSlot(resultSet.getInt("settings_pickaxe_slot"));
                         cachedSQLData.setSettingsMap(resultSet.getInt("settings_map"));
                         cachedSQLData.setSettingsRounds(resultSet.getInt("settings_rounds"));
+                        cachedSQLData.setSettingsBlockRemover(resultSet.getInt("settings_block_remover"));
                         cachedSQLData.setGadgetsStick(resultSet.getInt("gadgets_stick"));
                         cachedSQLData.setGadgetsBlocks(resultSet.getInt("gadgets_blocks"));
                         cachedSQLData.setStatsWins(resultSet.getInt("stats_wins"));

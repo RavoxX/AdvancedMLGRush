@@ -47,7 +47,8 @@ public class MapInstanceManager implements Registrable {
     private GameStateManager gameStateManager;
 
     public Optional<MapInstance> createInstance(final List<Player> players, final @NotNull MapTemplate mapTemplate,
-                                                final int rounds, final @NotNull Runnable onFinish) {
+                                                final int rounds, final @NotNull BlockRemover blockRemover,
+                                                final @NotNull Runnable onFinish) {
         if (players.size() != mapTemplate.getMapData().getMapType().getPlayers()) {
             players.forEach(player -> player.sendMessage(messageConfig.getWithPrefix(Optional.of(player), MessageConfig.ERROR)));
             onFinish.run();
@@ -57,7 +58,8 @@ public class MapInstanceManager implements Registrable {
             for (int i = 0; i < players.size(); i++) {
                 biMap.put(players.get(i), i);
             }
-            final MapInstance mapInstance = mapInstanceFactory.create(mapTemplate, mapTemplate.getMapData(), biMap, rounds);
+            final MapInstance mapInstance = mapInstanceFactory.create(
+                    mapTemplate, mapTemplate.getMapData(), biMap, rounds, blockRemover);
             players.forEach(player -> {
                 mapInstanceMap.put(player, mapInstance);
                 gameStateManager.setGameState(player, GameState.INGAME);

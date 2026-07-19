@@ -35,6 +35,7 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     public static final String LOBBY_SCOREBOARD = "lobby_scoreboard";
     public static final String MAP_2X1_SCOREBOARD = "map_2x1_scoreboard";
     public static final String MAP_4X1_SCOREBOARD = "map_4x1_scoreboard";
+    public static final String ROUND_ACTIONBAR = "round_actionbar";
 
     private final Placeholders placeholders;
 
@@ -56,6 +57,8 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     @Override
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
         list.add(new Pair<>(SCOREBOARD_TITLE, "  &8» &6&lMLGRush  "));
+        list.add(new Pair<>(ROUND_ACTIONBAR,
+                "&f%player1% &8» &f%player1_score% &8| &f%player2% &8» &f%player2_score%"));
         list.add(new Pair<>(LOBBY_SCOREBOARD, new ArrayList<>(Arrays.asList(
                 "&1",
                 "&7Wins&8:",

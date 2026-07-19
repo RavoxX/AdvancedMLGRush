@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.game.GameStateManager;
-import com.skillplugins.advancedmlgrush.game.buildmode.BuildModeManager;
 import com.skillplugins.advancedmlgrush.game.challenge.ChallengeManager;
 import com.skillplugins.advancedmlgrush.game.map.MapInstanceManager;
 import com.skillplugins.advancedmlgrush.game.map.setup.MapSetup2x1;
@@ -41,7 +40,6 @@ public class RegistrableInitializer implements Initializer {
 
     @Override
     public void init(final @NotNull Injector injector) {
-        manager.registerRegistrable(injector.getInstance(BuildModeManager.class));
         manager.registerRegistrable(injector.getInstance(ChallengeManager.class));
         manager.registerRegistrable(injector.getInstance(InventoryManager.class));
         manager.registerRegistrable(injector.getInstance(RoundManager.class));

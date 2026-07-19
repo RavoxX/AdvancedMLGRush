@@ -15,8 +15,8 @@ package com.skillplugins.advancedmlgrush.listener.listeners;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.event.EventManager;
-import com.skillplugins.advancedmlgrush.game.buildmode.BuildModeManager;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,8 +34,6 @@ public class InventoryClickListener implements Listener {
     @Inject
     private EventManager eventManager;
     @Inject
-    private BuildModeManager buildModeManager;
-    @Inject
     private JavaPlugin javaPlugin;
 
 
@@ -45,7 +43,7 @@ public class InventoryClickListener implements Listener {
     public void onClick(final @NotNull InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player) {
             final Player player = (Player) event.getWhoClicked();
-            event.setCancelled(!buildModeManager.isInBuildMode(player));
+            event.setCancelled(player.getGameMode() != GameMode.CREATIVE);
 
             if (!cooldowns.contains(player.getName())) {
                 eventManager.callEvent(event);

@@ -32,7 +32,6 @@ public class CommandInitializer implements Initializer {
 
     @Override
     public void init(final @NotNull Injector injector) {
-        javaPlugin.getCommand("build").setExecutor(injector.getInstance(BuildCommand.class));
         javaPlugin.getCommand("setspawn").setExecutor(injector.getInstance(SetSpawnCommand.class));
         javaPlugin.getCommand("setupmap").setExecutor(injector.getInstance(SetupMapCommand.class));
         javaPlugin.getCommand("quit").setExecutor(injector.getInstance(QuitCommand.class));

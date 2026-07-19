@@ -19,6 +19,7 @@ import com.skillplugins.advancedmlgrush.annotations.PostConstruct;
 import com.skillplugins.advancedmlgrush.config.configs.CommandConfig;
 import com.skillplugins.advancedmlgrush.config.configs.MainConfig;
 import com.skillplugins.advancedmlgrush.config.configs.MessageConfig;
+import com.skillplugins.advancedmlgrush.config.configs.ScoreboardConfig;
 import com.skillplugins.advancedmlgrush.config.configs.SoundConfig;
 import com.skillplugins.advancedmlgrush.event.EventHandler;
 import com.skillplugins.advancedmlgrush.event.EventListener;
@@ -28,7 +29,6 @@ import com.skillplugins.advancedmlgrush.event.events.GameEndEvent;
 import com.skillplugins.advancedmlgrush.event.events.GameStartEvent;
 import com.skillplugins.advancedmlgrush.game.GameState;
 import com.skillplugins.advancedmlgrush.game.GameStateManager;
-import com.skillplugins.advancedmlgrush.game.buildmode.BuildModeManager;
 import com.skillplugins.advancedmlgrush.game.map.schematic.SchematicLoader;
 import com.skillplugins.advancedmlgrush.game.map.world.MapWorldGenerator;
 import com.skillplugins.advancedmlgrush.game.scoreboard.ScoreboardManager;
@@ -38,15 +38,19 @@ import com.skillplugins.advancedmlgrush.item.EnumItem;
 import com.skillplugins.advancedmlgrush.item.ItemUtils;
 import com.skillplugins.advancedmlgrush.item.items.IngameItems;
 import com.skillplugins.advancedmlgrush.item.items.LobbyItems;
+import com.skillplugins.advancedmlgrush.lib.xseries.ActionBar;
 import com.skillplugins.advancedmlgrush.lib.xseries.XMaterial;
 import com.skillplugins.advancedmlgrush.sound.SoundUtil;
+import com.skillplugins.advancedmlgrush.sql.data.CachedSQLData;
 import com.skillplugins.advancedmlgrush.sql.data.SQLDataCache;
+import com.skillplugins.advancedmlgrush.sql.datasavers.MLGDataSaver;
 import com.skillplugins.advancedmlgrush.util.ListBuilder;
 import com.skillplugins.advancedmlgrush.util.LocationConverter;
 import com.skillplugins.advancedmlgrush.util.LocationUtils;
 import com.skillplugins.advancedmlgrush.util.Pair;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -58,6 +62,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -68,17 +74,22 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class MapInstance implements EventHandler {
 
-    private final Map<Location, Player> placedBlocks = new HashMap<>();
+    private final Map<Location, PlacedBlock> placedBlocks = new HashMap<>();
+    private final Set<Integer> blockRemovalTasks = new HashSet<>();
+    private int actionBarTaskId = -1;
     @Getter
     private final List<Player> spectators = new CopyOnWriteArrayList<>();
     @Getter
@@ -96,6 +107,8 @@ public class MapInstance implements EventHandler {
     @Getter
     private final int rounds;
     @Getter
+    private final BlockRemover blockRemover;
+    @Getter
     private boolean loaded = false;
 
     @Getter
@@ -111,6 +124,8 @@ public class MapInstance implements EventHandler {
     private MessageConfig messageConfig;
     @Inject
     private SQLDataCache sqlDataCache;
+    @Inject
+    private MLGDataSaver mlgDataSaver;
     @Inject
     private SpawnFileLoader spawnFileLoader;
     @Inject
@@ -137,21 +152,23 @@ public class MapInstance implements EventHandler {
     @Inject
     private ScoreboardManager scoreboardManager;
     @Inject
-    private BuildModeManager buildModeManager;
-    @Inject
     private GameStateManager gameStateManager;
     @Inject
     private CommandConfig commandConfig;
+    @Inject
+    private ScoreboardConfig scoreboardConfig;
 
     @Inject
     public MapInstance(final @Assisted @NotNull MapTemplate mapTemplate,
                        final @Assisted @NotNull MapData mapData,
                        final @Assisted @NotNull BiMap<Player, Integer> players,
-                       final @Assisted int rounds) {
+                       final @Assisted int rounds,
+                       final @Assisted @NotNull BlockRemover blockRemover) {
         this.mapTemplate = mapTemplate;
         this.mapData = mapData;
         this.players = players;
         this.rounds = rounds;
+        this.blockRemover = blockRemover;
     }
 
     @PostConstruct
@@ -242,6 +259,7 @@ public class MapInstance implements EventHandler {
                                 if (index == players.get(player)) {
                                     player.sendMessage(messageConfig.getWithPrefix(optionalPlayer, MessageConfig.BREAK_OWN_BED));
                                 } else {
+                                    clearAllPlacedBlocks();
                                     final int playerIndex = players.get(player);
                                     final Player bedOwner = players.inverse().get(index);
                                     mapStats.increaseScore(playerIndex);
@@ -255,9 +273,6 @@ public class MapInstance implements EventHandler {
                                     if (score == rounds) {
                                         endGame(player);
                                     } else {
-                                        if (getBlockRemover() == BlockRemover.ROUND_RESET) {
-                                            clearBlocks();
-                                        }
                                         teleportToPlayerSpawn(players.keySet());
                                         scoreboardManager.updateScoreboard(players.keySet());
                                         players.keySet().forEach(player1 -> {
@@ -309,10 +324,34 @@ public class MapInstance implements EventHandler {
                                 if (infiniteBlocks) {
                                     player.getItemInHand().setAmount(mainConfig.getInt(MainConfig.BLOCK_AMOUNT));
                                 }
-                                placedBlocks.put(location, player);
+                                final PlacedBlock placedBlock = new PlacedBlock(player);
+                                placedBlocks.put(location, placedBlock);
+                                if (blockRemover == BlockRemover.NORMAL) {
+                                    scheduleBlockRemoval(location, placedBlock);
+                                }
                                 sqlDataCache.getSQLData(player).increasePlacedBlocks();
                             }
                         }
+                    }
+                }
+            }
+        });
+        eventListeners.add(new EventListener<InventoryClickEvent>(InventoryClickEvent.class, EventListenerPriority.MEDIUM) {
+            @Override
+            protected void onEvent(final @NotNull InventoryClickEvent event) {
+                if (event.getWhoClicked() instanceof Player
+                        && players.containsKey((Player) event.getWhoClicked())) {
+                    event.setCancelled(false);
+                }
+            }
+        });
+        eventListeners.add(new EventListener<InventoryCloseEvent>(InventoryCloseEvent.class, EventListenerPriority.MEDIUM) {
+            @Override
+            protected void onEvent(final @NotNull InventoryCloseEvent event) {
+                if (event.getPlayer() instanceof Player) {
+                    final Player player = (Player) event.getPlayer();
+                    if (players.containsKey(player)) {
+                        saveInventoryLayout(player);
                     }
                 }
             }
@@ -324,12 +363,12 @@ public class MapInstance implements EventHandler {
 
                 if (players.containsKey(player)
                         || spectators.contains(player)) {
-                    if (!buildModeManager.isInBuildMode(player)) {
+                    if (player.getGameMode() != GameMode.CREATIVE) {
                         if (loaded) {
 
                             if (event.getTo().getY() <= mapData.getDeathHeight()) {
                                 if (players.containsKey(player)) {
-                                    if (getBlockRemover() == BlockRemover.DEATH_RESET) {
+                                    if (blockRemover == BlockRemover.DEATH_RESET) {
                                         clearBlocks(player);
                                     }
                                     teleportToPlayerSpawn(player);
@@ -337,12 +376,6 @@ public class MapInstance implements EventHandler {
                                     sqlDataCache.getSQLData(player).increaseDeaths();
                                     commandConfig.runCommand(CommandConfig.DEATH, Optional.of(player));
 
-                                    players.keySet().forEach(player1 -> player1.sendMessage(killMap.containsKey(player)
-                                            ? messageConfig.getWithPrefix(Optional.of(player1), MessageConfig.KILL)
-                                            .replace("%player_1%", killMap.get(player).getName())
-                                            .replace("%player_2%", player.getName())
-                                            : messageConfig.getWithPrefix(Optional.of(player1), MessageConfig.DEATH)
-                                            .replace("%player_1%", player.getName())));
                                     final Player lastDamager = killMap.getOrDefault(player, null);
                                     if (lastDamager != null
                                             && lastDamager.isOnline()) {
@@ -460,6 +493,7 @@ public class MapInstance implements EventHandler {
     private void startGame() {
         teleportToPlayerSpawn(players.keySet());
         loaded = true;
+        startActionBar();
         tasks.forEach(Runnable::run);
         scoreboardManager.updateScoreboard(players.keySet());
         players.keySet().forEach(player -> {
@@ -470,6 +504,8 @@ public class MapInstance implements EventHandler {
     }
 
     private void endGame(final @NotNull Player winner) {
+        stopActionBar();
+        cancelBlockRemovalTasks();
         Bukkit.getPluginManager().callEvent(new GameEndEvent(this, winner));
         sqlDataCache.getSQLData(winner).increaseWins();
         spectators.forEach(this::removeSpectator);
@@ -500,6 +536,7 @@ public class MapInstance implements EventHandler {
     }
 
     public void quitMap(final @NotNull Player player) {
+        ActionBar.clearActionBar(player);
         players.remove(player);
         mapInstanceManager.unregister(player);
         sqlDataCache.getSQLData(player).increaseLoses();
@@ -512,25 +549,127 @@ public class MapInstance implements EventHandler {
         }
     }
 
-    private BlockRemover getBlockRemover() {
-        return BlockRemover.fromConfig(mainConfig.getString(MainConfig.BLOCK_REMOVER));
-    }
-
-    private void clearBlocks() {
-        for (final Location placedBlock : placedBlocks.keySet()) {
-            placedBlock.getBlock().setType(Material.AIR);
-        }
-        placedBlocks.clear();
-    }
-
     private void clearBlocks(final @NotNull Player player) {
-        final Iterator<Map.Entry<Location, Player>> iterator = placedBlocks.entrySet().iterator();
+        final Iterator<Map.Entry<Location, PlacedBlock>> iterator = placedBlocks.entrySet().iterator();
         while (iterator.hasNext()) {
-            final Map.Entry<Location, Player> entry = iterator.next();
-            if (entry.getValue().equals(player)) {
+            final Map.Entry<Location, PlacedBlock> entry = iterator.next();
+            if (entry.getValue().getPlayer().equals(player)) {
                 entry.getKey().getBlock().setType(Material.AIR);
                 iterator.remove();
             }
+        }
+    }
+
+    private void clearAllPlacedBlocks() {
+        cancelBlockRemovalTasks();
+        placedBlocks.keySet().forEach(location -> location.getBlock().setType(Material.AIR));
+        placedBlocks.clear();
+    }
+
+    private void saveInventoryLayout(final @NotNull Player player) {
+        if (!sqlDataCache.isLoaded(player)) {
+            return;
+        }
+
+        final ItemStack stick = ingameItems.getStick(player).getKey();
+        final ItemStack blocks = ingameItems.getBlock(player).getKey();
+        final ItemStack pickaxe = ingameItems.getPickaxe(player).getKey();
+        final CachedSQLData data = sqlDataCache.getSQLData(player);
+        boolean changed = false;
+
+        for (int slot = 0; slot < 9; slot++) {
+            final ItemStack itemStack = player.getInventory().getItem(slot);
+            if (matchesConfiguredItem(itemStack, stick)) {
+                if (data.getSettingsStickSlot() != slot) {
+                    data.setSettingsStickSlot(slot);
+                    changed = true;
+                }
+            } else if (matchesConfiguredItem(itemStack, blocks)) {
+                if (data.getSettingsBlockSlot() != slot) {
+                    data.setSettingsBlockSlot(slot);
+                    changed = true;
+                }
+            } else if (matchesConfiguredItem(itemStack, pickaxe)) {
+                if (data.getSettingsPickaxeSlot() != slot) {
+                    data.setSettingsPickaxeSlot(slot);
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            mlgDataSaver.updatePlayer(player, data);
+        }
+    }
+
+    private boolean matchesConfiguredItem(final ItemStack itemStack, final ItemStack configuredItem) {
+        return itemUtils.isValidItem(itemStack)
+                && itemUtils.isValidItem(configuredItem)
+                && itemStack.getType() == configuredItem.getType()
+                && itemStack.getItemMeta().getDisplayName().equals(configuredItem.getItemMeta().getDisplayName());
+    }
+
+    private void startActionBar() {
+        stopActionBarTask();
+        actionBarTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
+                javaPlugin, this::updateActionBar, 0L, 20L);
+    }
+
+    private void updateActionBar() {
+        players.keySet().forEach(viewer -> {
+            String message = scoreboardConfig.getString(Optional.of(viewer), ScoreboardConfig.ROUND_ACTIONBAR);
+            for (int index = 0; index < 4; index++) {
+                final int number = index + 1;
+                final Optional<Player> participant = getPlayer(index);
+                message = message.replace("%player" + number + "%",
+                                participant.map(Player::getName).orElse("-"))
+                        .replace("%player" + number + "_score%",
+                                participant.isPresent() ? String.valueOf(mapStats.getScore(index)) : "0");
+            }
+            ActionBar.sendActionBar(viewer, message);
+        });
+    }
+
+    private void stopActionBar() {
+        stopActionBarTask();
+        players.keySet().forEach(ActionBar::clearActionBar);
+    }
+
+    private void stopActionBarTask() {
+        if (actionBarTaskId >= 0) {
+            Bukkit.getScheduler().cancelTask(actionBarTaskId);
+            actionBarTaskId = -1;
+        }
+    }
+
+    private void scheduleBlockRemoval(final @NotNull Location location, final @NotNull PlacedBlock placedBlock) {
+        final long delay = Math.max(0, mainConfig.getInt(MainConfig.BLOCK_REMOVER_DELAY_SECONDS)) * 20L;
+        final AtomicInteger taskId = new AtomicInteger();
+        taskId.set(Bukkit.getScheduler().scheduleSyncDelayedTask(javaPlugin, () -> {
+            blockRemovalTasks.remove(taskId.get());
+            if (placedBlocks.get(location) == placedBlock) {
+                location.getBlock().setType(Material.AIR);
+                placedBlocks.remove(location);
+            }
+        }, delay));
+        blockRemovalTasks.add(taskId.get());
+    }
+
+    private void cancelBlockRemovalTasks() {
+        blockRemovalTasks.forEach(Bukkit.getScheduler()::cancelTask);
+        blockRemovalTasks.clear();
+    }
+
+    private static final class PlacedBlock {
+
+        private final Player player;
+
+        private PlacedBlock(final @NotNull Player player) {
+            this.player = player;
+        }
+
+        private Player getPlayer() {
+            return player;
         }
     }
 

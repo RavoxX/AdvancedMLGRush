@@ -44,10 +44,21 @@ public class MapTemplate {
     }
 
     public void createInstance(final @NotNull List<Player> players, final int rounds) {
-        createInstance(players, rounds, Runnables.doNothing());
+        createInstance(players, rounds, BlockRemover.NORMAL, Runnables.doNothing());
     }
 
     public void createInstance(final @NotNull List<Player> players, final int rounds,
+                               final @NotNull BlockRemover blockRemover) {
+        createInstance(players, rounds, blockRemover, Runnables.doNothing());
+    }
+
+    public void createInstance(final @NotNull List<Player> players, final int rounds,
+                               final @NotNull Runnable onFinish) {
+        createInstance(players, rounds, BlockRemover.NORMAL, onFinish);
+    }
+
+    public void createInstance(final @NotNull List<Player> players, final int rounds,
+                               final @NotNull BlockRemover blockRemover,
                                final @NotNull Runnable onFinish) {
         players.forEach(player -> {
             challengeManager.unregister(player);
@@ -55,6 +66,6 @@ public class MapTemplate {
             queue4X1.unregister(player);
             player.getInventory().clear();
         });
-        mapInstanceManager.createInstance(players, this, rounds, onFinish);
+        mapInstanceManager.createInstance(players, this, rounds, blockRemover, onFinish);
     }
 }

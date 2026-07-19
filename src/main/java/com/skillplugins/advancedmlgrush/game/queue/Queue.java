@@ -18,6 +18,7 @@ import com.skillplugins.advancedmlgrush.config.configs.MainConfig;
 import com.skillplugins.advancedmlgrush.config.configs.MessageConfig;
 import com.skillplugins.advancedmlgrush.config.configs.SoundConfig;
 import com.skillplugins.advancedmlgrush.game.map.MapInstanceManager;
+import com.skillplugins.advancedmlgrush.game.map.BlockRemover;
 import com.skillplugins.advancedmlgrush.game.map.MapManager;
 import com.skillplugins.advancedmlgrush.game.map.MapTemplate;
 import com.skillplugins.advancedmlgrush.game.map.MapType;
@@ -25,6 +26,7 @@ import com.skillplugins.advancedmlgrush.game.scoreboard.ScoreboardManager;
 import com.skillplugins.advancedmlgrush.item.items.LobbyItems;
 import com.skillplugins.advancedmlgrush.miscellaneous.registrable.Registrable;
 import com.skillplugins.advancedmlgrush.sound.SoundUtil;
+import com.skillplugins.advancedmlgrush.sql.data.SQLDataCache;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -57,6 +59,8 @@ public abstract class Queue implements Registrable {
     private ScoreboardManager scoreboardManager;
     @Inject
     private MapInstanceManager mapInstanceManager;
+    @Inject
+    private SQLDataCache sqlDataCache;
 
     @PostConstruct
     public void init() {
@@ -130,7 +134,10 @@ public abstract class Queue implements Registrable {
             });
         } else {
             final int rounds = mainConfig.getInt(MainConfig.DEFAULT_ROUNDS);
-            mapTemplate.get().createInstance(new ArrayList<>(queue), rounds);
+            final Player firstPlayer = queue.get(0);
+            final BlockRemover blockRemover = BlockRemover.fromId(
+                    sqlDataCache.getSQLData(firstPlayer).getSettingsBlockRemover());
+            mapTemplate.get().createInstance(new ArrayList<>(queue), rounds, blockRemover);
         }
     }
 }

@@ -15,7 +15,7 @@ package com.skillplugins.advancedmlgrush.listener.listeners;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.event.EventManager;
-import com.skillplugins.advancedmlgrush.game.buildmode.BuildModeManager;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,19 +28,16 @@ import java.io.IOException;
 public class BlockBreakListener implements Listener {
 
     private final EventManager eventManager;
-    private final BuildModeManager buildModeManager;
 
     @Inject
-    public BlockBreakListener(final @NotNull EventManager eventManager,
-                              final @NotNull BuildModeManager buildModeManager) {
+    public BlockBreakListener(final @NotNull EventManager eventManager) {
         this.eventManager = eventManager;
-        this.buildModeManager = buildModeManager;
     }
 
     @EventHandler
     public void onBreak(final @NotNull BlockBreakEvent event) throws IOException {
         final Player player = event.getPlayer();
-        event.setCancelled(!buildModeManager.isInBuildMode(player));
+        event.setCancelled(player.getGameMode() != GameMode.CREATIVE);
 
         eventManager.callEvent(event);
     }

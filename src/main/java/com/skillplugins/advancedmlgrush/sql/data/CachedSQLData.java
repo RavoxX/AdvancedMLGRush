@@ -12,6 +12,7 @@
 
 package com.skillplugins.advancedmlgrush.sql.data;
 
+import com.skillplugins.advancedmlgrush.game.map.BlockRemover;
 import lombok.Data;
 
 @Data
@@ -26,6 +27,7 @@ public class CachedSQLData {
     private int settingsPickaxeSlot = 8;
     private int settingsMap = 0;
     private int settingsRounds = 5;
+    private int settingsBlockRemover = BlockRemover.NORMAL.getId();
     private int gadgetsStick = 0;
     private int gadgetsBlocks = 0;
     private int statsWins = 0;

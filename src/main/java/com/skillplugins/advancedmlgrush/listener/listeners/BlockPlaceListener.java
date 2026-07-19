@@ -15,7 +15,7 @@ package com.skillplugins.advancedmlgrush.listener.listeners;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.event.EventManager;
-import com.skillplugins.advancedmlgrush.game.buildmode.BuildModeManager;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,19 +26,16 @@ import org.jetbrains.annotations.NotNull;
 public class BlockPlaceListener implements Listener {
 
     private final EventManager eventManager;
-    private final BuildModeManager buildModeManager;
 
     @Inject
-    public BlockPlaceListener(final @NotNull EventManager eventManager,
-                              final @NotNull BuildModeManager buildModeManager) {
+    public BlockPlaceListener(final @NotNull EventManager eventManager) {
         this.eventManager = eventManager;
-        this.buildModeManager = buildModeManager;
     }
 
     @EventHandler
     public void onPlace(final @NotNull BlockPlaceEvent event) {
         final Player player = event.getPlayer();
-        event.setCancelled(!buildModeManager.isInBuildMode(player));
+        event.setCancelled(player.getGameMode() != GameMode.CREATIVE);
 
         eventManager.callEvent(event);
     }
