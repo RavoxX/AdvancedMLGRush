@@ -28,6 +28,7 @@ import com.skillplugins.advancedmlgrush.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -106,6 +107,15 @@ public class SettingsInventory extends AbstractInventory {
                             soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
                         }
                     }
+                }
+            }
+        });
+        eventListeners.add(new EventListener<InventoryCloseEvent>(InventoryCloseEvent.class, EventListenerPriority.MEDIUM) {
+            @Override
+            protected void onEvent(final @NotNull InventoryCloseEvent event) {
+                final Player player = (Player) event.getPlayer();
+                if (inventoryUtils.isOpenInventory(player, clazz)) {
+                    sqlDataCache.save(player);
                 }
             }
         });

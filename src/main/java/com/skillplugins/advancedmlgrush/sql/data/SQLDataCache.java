@@ -97,6 +97,13 @@ public class SQLDataCache implements Registrable, EventHandler {
         return cache.containsKey(player);
     }
 
+    public void save(final @NotNull Player player) {
+        final CachedSQLData cachedSQLData = cache.get(player);
+        if (cachedSQLData != null) {
+            mlgDataSaver.updatePlayer(player, cachedSQLData);
+        }
+    }
+
     @Override
     public void registerListeners(final @NotNull List<EventListener<?>> eventListeners) {
         eventListeners.add(new EventListener<PlayerJoinEvent>(PlayerJoinEvent.class, EventListenerPriority.MEDIUM) {
@@ -131,9 +138,7 @@ public class SQLDataCache implements Registrable, EventHandler {
             @Override
             protected void onEvent(final @NotNull PlayerQuitEvent event) {
                 final Player player = event.getPlayer();
-                if (isLoaded(player)) {
-                    mlgDataSaver.updatePlayer(player, cache.get(player));
-                }
+                save(player);
             }
         });
     }

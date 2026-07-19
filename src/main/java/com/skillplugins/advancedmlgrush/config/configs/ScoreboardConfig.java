@@ -39,6 +39,7 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     private static final String GOONRUSH_SCOREBOARD_MIGRATED = "goonrush_scoreboard_migrated";
     private static final String GOONRUSH_BLUE_THEME_MIGRATED = "goonrush_blue_theme_migrated";
     private static final String GOONRUSH_GREEN_THEME_MIGRATED = "goonrush_green_theme_migrated";
+    private static final String GOONRUSH_RED_THEME_MIGRATED = "goonrush_red_theme_migrated";
 
     private final Placeholders placeholders;
 
@@ -51,24 +52,31 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
     public void initConfig() {
         super.init();
         if (!getBoolean(GOONRUSH_SCOREBOARD_MIGRATED)) {
-            getYamlConfiguration().set(SCOREBOARD_TITLE, "&a&lGOONRUSH");
+            getYamlConfiguration().set(SCOREBOARD_TITLE, "&c&lGOONRUSH");
             getYamlConfiguration().set(MAP_2X1_SCOREBOARD, createRoundScoreboard());
             getYamlConfiguration().set(MAP_4X1_SCOREBOARD, createRoundScoreboard());
             getYamlConfiguration().set(GOONRUSH_SCOREBOARD_MIGRATED, true);
             saveConfig();
         }
         if (!getBoolean(GOONRUSH_BLUE_THEME_MIGRATED)) {
-            getYamlConfiguration().set(SCOREBOARD_TITLE, "&a&lGOONRUSH");
+            getYamlConfiguration().set(SCOREBOARD_TITLE, "&c&lGOONRUSH");
             getYamlConfiguration().set(MAP_2X1_SCOREBOARD, createRoundScoreboard());
             getYamlConfiguration().set(MAP_4X1_SCOREBOARD, createRoundScoreboard());
             getYamlConfiguration().set(GOONRUSH_BLUE_THEME_MIGRATED, true);
             saveConfig();
         }
         if (!getBoolean(GOONRUSH_GREEN_THEME_MIGRATED)) {
-            getYamlConfiguration().set(SCOREBOARD_TITLE, "&a&lGOONRUSH");
+            getYamlConfiguration().set(SCOREBOARD_TITLE, "&c&lGOONRUSH");
             getYamlConfiguration().set(MAP_2X1_SCOREBOARD, createRoundScoreboard());
             getYamlConfiguration().set(MAP_4X1_SCOREBOARD, createRoundScoreboard());
             getYamlConfiguration().set(GOONRUSH_GREEN_THEME_MIGRATED, true);
+            saveConfig();
+        }
+        if (!getBoolean(GOONRUSH_RED_THEME_MIGRATED)) {
+            getYamlConfiguration().set(SCOREBOARD_TITLE, "&c&lGOONRUSH");
+            getYamlConfiguration().set(MAP_2X1_SCOREBOARD, createRoundScoreboard());
+            getYamlConfiguration().set(MAP_4X1_SCOREBOARD, createRoundScoreboard());
+            getYamlConfiguration().set(GOONRUSH_RED_THEME_MIGRATED, true);
             saveConfig();
         }
     }
@@ -80,7 +88,7 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
 
     @Override
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
-        list.add(new Pair<>(SCOREBOARD_TITLE, "&a&lGOONRUSH"));
+        list.add(new Pair<>(SCOREBOARD_TITLE, "&c&lGOONRUSH"));
         list.add(new Pair<>(ROUND_ACTIONBAR,
                 "&f%player1% &8» &f%player1_score% &8| &f%player2% &8» &f%player2_score%"));
         list.add(new Pair<>(LOBBY_SCOREBOARD, new ArrayList<>(Arrays.asList(
@@ -100,12 +108,13 @@ public class ScoreboardConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(GOONRUSH_SCOREBOARD_MIGRATED, false));
         list.add(new Pair<>(GOONRUSH_BLUE_THEME_MIGRATED, false));
         list.add(new Pair<>(GOONRUSH_GREEN_THEME_MIGRATED, false));
+        list.add(new Pair<>(GOONRUSH_RED_THEME_MIGRATED, false));
     }
 
     private static ArrayList<String> createRoundScoreboard() {
         return new ArrayList<>(Arrays.asList(
                 "&8&m----------------",
-                "&7Map&8: &a%map_name%",
+                "&7Map&8: &c%map_name%",
                 "&1",
                 "&7No Block Remover&8: %block_remover_off_status%",
                 "&7Normal&8: %block_remover_normal_status%",

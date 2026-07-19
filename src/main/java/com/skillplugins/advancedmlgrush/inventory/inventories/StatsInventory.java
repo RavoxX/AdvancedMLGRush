@@ -72,7 +72,7 @@ public class StatsInventory extends AbstractInventory {
                 " ",
                 "&7Your personal MLGrush overview",
                 " ",
-                "&8Games &7• &a%stats_wins% wins &8/ &c%stats_loses% losses"
+                "&8Games &7• &c%stats_wins% wins &8/ &c%stats_loses% losses"
         ));
         placeholders.replace(optionalPlayer, profileLore);
         inventory.setItem(4, ibFactory.create(MetaType.SKULL_META, 3)
@@ -82,7 +82,7 @@ public class StatsInventory extends AbstractInventory {
                 .build());
 
         setStatItem(inventory, optionalPlayer, EnumItem.STATS_WINS,
-                "&7Rounds won", "&a%stats_wins%");
+                "&7Rounds won", "&c%stats_wins%");
         setStatItem(inventory, optionalPlayer, EnumItem.STATS_LOSES,
                 "&7Rounds lost", "&c%stats_loses%");
         setStatItem(inventory, optionalPlayer, EnumItem.STATS_WIN_RATE,

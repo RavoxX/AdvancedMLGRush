@@ -25,6 +25,7 @@ import com.skillplugins.advancedmlgrush.game.queue.Queue4x1;
 import com.skillplugins.advancedmlgrush.game.rounds.RoundManager;
 import com.skillplugins.advancedmlgrush.game.scoreboard.ScoreboardManager;
 import com.skillplugins.advancedmlgrush.inventory.InventoryManager;
+import com.skillplugins.advancedmlgrush.sql.data.SQLDataCache;
 import com.skillplugins.advancedmlgrush.util.Initializer;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,6 +41,7 @@ public class RegistrableInitializer implements Initializer {
 
     @Override
     public void init(final @NotNull Injector injector) {
+        manager.registerRegistrable(injector.getInstance(SQLDataCache.class));
         manager.registerRegistrable(injector.getInstance(ChallengeManager.class));
         manager.registerRegistrable(injector.getInstance(InventoryManager.class));
         manager.registerRegistrable(injector.getInstance(RoundManager.class));

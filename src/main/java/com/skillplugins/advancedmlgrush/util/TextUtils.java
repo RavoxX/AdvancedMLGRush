@@ -24,8 +24,8 @@ public final class TextUtils {
         // Older builds compiled UTF-8 source as Windows-1252 and could persist
         // an extra \u00c2 before section signs and arrow characters in YAML files.
         String normalized = input.replace("\u00c2", "")
-                .replaceAll("(?i)&[16eb]", "&a")
-                .replaceAll("(?i)\u00a7[16eb]", "\u00a7a");
+                .replaceAll("(?i)&[a16eb]", "&c")
+                .replaceAll("(?i)\u00a7[a16eb]", "\u00a7c");
 
         // Decorative symbols always use dark gray, independent of the configured
         // color immediately before them.
@@ -35,12 +35,12 @@ public final class TextUtils {
                 "(?i)(?<!&8)(?<!\u00a78)(?=[»«|•])", "&8");
 
         // Ranking hashes are gray while the following value returns to the
-        // dark-blue theme color.
+        // red theme color.
         normalized = normalized.replaceAll(
                 "(?i)(?:&[0-9a-fk-or]|\u00a7[0-9a-fk-or])+(?=#)", "&8");
         normalized = normalized.replaceAll(
                 "(?i)(?<!&8)(?<!\u00a78)(?=#)", "&8");
-        normalized = normalized.replace("#", "#&a");
+        normalized = normalized.replace("#", "#&c");
 
         // Plus/minus navigation buttons consist only of the symbol itself.
         if (normalized.matches("(?i)(?:&[0-9a-fk-or]|\u00a7[0-9a-fk-or])*[+-]")) {

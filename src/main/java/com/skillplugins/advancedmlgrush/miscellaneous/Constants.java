@@ -51,7 +51,7 @@ public class Constants {
     public static final String WORLD_PATH = PLUGIN_PATH + "worlds/";
 
     /* Messages */
-    public static final String MLGRUSH_COMMAND_MESSAGE = "&aGoonRush &7version &a%s &7by &aFuneralFlower&7.";
+    public static final String MLGRUSH_COMMAND_MESSAGE = "&cGoonRush &7version &c%s &7by &cFuneralFlower&7.";
     public static final String STARTUP_MESSAGE = "\n" + Ansi.ansi().fg(Ansi.Color.YELLOW) +
             "=============================================================================================================\n" +
             "             _                               _ __  __ _      _____ _____           _     \n" +

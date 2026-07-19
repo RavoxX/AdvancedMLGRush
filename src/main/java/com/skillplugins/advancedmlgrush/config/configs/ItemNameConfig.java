@@ -45,7 +45,7 @@ public class ItemNameConfig extends Configurable implements Replaceable {
         changed |= migrateName(EnumItem.GADGETS_STICK, "&8» &eStick", "&8» &bStick Perks");
         changed |= migrateName(EnumItem.GADGETS_BLOCKS, "&8» &eBlocks", "&8» &bBlock Perks");
         changed |= migrateName(EnumItem.STATS, "&8» &eStats", "&8» &6Profile");
-        changed |= migrateName(EnumItem.STATS_WINS, "&8» &eWins &8| &e&l%stats_wins%", "&a&lVictories");
+        changed |= migrateName(EnumItem.STATS_WINS, "&8» &eWins &8| &e&l%stats_wins%", "&c&lVictories");
         changed |= migrateName(EnumItem.STATS_LOSES, "&8» &eLoses &8| &e&l%stats_loses%", "&c&lDefeats");
         changed |= migrateName(EnumItem.STATS_WIN_RATE, "&8» &eWin Rate &8| &e&l%stats_win_rate%", "&b&lWin Ratio");
         changed |= migrateName(EnumItem.STATS_BEDS, "&8» &eBeds &8| &e&l%stats_beds%", "&e&lBeds Destroyed");
@@ -94,12 +94,12 @@ public class ItemNameConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(EnumItem.BLOCK_REMOVER_DEATH_RESET.getConfigPath(), "&8» &dDeath Reset"));
         list.add(new Pair<>(EnumItem.GADGETS_STICK.getConfigPath(), "&8» &bStick Perks"));
         list.add(new Pair<>(EnumItem.GADGETS_BLOCKS.getConfigPath(), "&8» &bBlock Perks"));
-        list.add(new Pair<>(EnumItem.SORTING_SAVE.getConfigPath(), "&8» &aSave"));
+        list.add(new Pair<>(EnumItem.SORTING_SAVE.getConfigPath(), "&8» &cSave"));
         list.add(new Pair<>(EnumItem.SORTING_RESET.getConfigPath(), "&8» &cReset"));
         list.add(new Pair<>(EnumItem.ROUNDS_INCREASE.getConfigPath(), "&e+"));
         list.add(new Pair<>(EnumItem.ROUNDS_DECREASE.getConfigPath(), "&e-"));
         list.add(new Pair<>(EnumItem.ROUNDS.getConfigPath(), "&8» &e%settings_rounds% &8«"));
-        list.add(new Pair<>(EnumItem.STATS_WINS.getConfigPath(), "&a&lVictories"));
+        list.add(new Pair<>(EnumItem.STATS_WINS.getConfigPath(), "&c&lVictories"));
         list.add(new Pair<>(EnumItem.STATS_LOSES.getConfigPath(), "&c&lDefeats"));
         list.add(new Pair<>(EnumItem.STATS_WIN_RATE.getConfigPath(), "&b&lWin Ratio"));
         list.add(new Pair<>(EnumItem.STATS_BEDS.getConfigPath(), "&e&lBeds Destroyed"));

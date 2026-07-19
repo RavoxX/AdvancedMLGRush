@@ -112,30 +112,30 @@ public class MessageConfig extends Configurable implements Replaceable {
     protected void configure(final @NotNull List<Pair<String, Object>> list) {
         list.add(new Pair<>(PREFIX, "&8» &6&lGoonRush &8| &7"));
         list.add(new Pair<>(NO_PERMISSION, "&cYou don't have permission to execute this command!"));
-        list.add(new Pair<>(QUEUE_JOIN, "&aYou entered the queue."));
-        list.add(new Pair<>(QUEUE_LEAVE, "&aYou left the queue."));
+        list.add(new Pair<>(QUEUE_JOIN, "&cYou entered the queue."));
+        list.add(new Pair<>(QUEUE_LEAVE, "&cYou left the queue."));
         list.add(new Pair<>(LOADING_DATA, "&cYour data is being loaded, please wait."));
         list.add(new Pair<>(ERROR, "&cAn error occurred."));
         list.add(new Pair<>(RESTART, "&cThis server is restarting."));
         list.add(new Pair<>(CANNOT_USE_COMMAND, "&cYou can't use this command now."));
-        list.add(new Pair<>(SPAWN_SET, "&aThe spawn has been set."));
-        list.add(new Pair<>(CHALLENGE_1, "&e%player% &achallenged you &aon &e%settings_map% &a(&e%settings_rounds% rounds&a)."));
-        list.add(new Pair<>(CHALLENGE_2, "&aYou challenged %player%."));
-        list.add(new Pair<>(ALREADY_CHALLENGED, "&cYou already challenged &e%player%&a."));
+        list.add(new Pair<>(SPAWN_SET, "&cThe spawn has been set."));
+        list.add(new Pair<>(CHALLENGE_1, "&e%player% &cchallenged you &con &e%settings_map% &c(&e%settings_rounds% rounds&c)."));
+        list.add(new Pair<>(CHALLENGE_2, "&cYou challenged %player%."));
+        list.add(new Pair<>(ALREADY_CHALLENGED, "&cYou already challenged &e%player%&c."));
         list.add(new Pair<>(ALREADY_SETTING_UP_MAP, "&cYou are already setting up a map."));
         list.add(new Pair<>(CANNOT_ENTER_QUEUE, "&cYou cannot enter the queue now."));
         list.add(new Pair<>(CANNOT_CHALLENGE_PLAYERS, "&cYou cannot challenge players now."));
-        list.add(new Pair<>(MAP_GENERATE, "&aGenerating map..."));
+        list.add(new Pair<>(MAP_GENERATE, "&cGenerating map..."));
         list.add(new Pair<>(BREAK_OWN_BED, "&cYou cannot break your own bed!"));
-        list.add(new Pair<>(GADGET_SELECT, "&aYou selected %gadget_name%&a."));
+        list.add(new Pair<>(GADGET_SELECT, "&cYou selected %gadget_name%&c."));
         list.add(new Pair<>(DEATH, "&c%player_1% &7died."));
         list.add(new Pair<>(KILL, "&c%player_1% &7killed &e%player_2%&7."));
         list.add(new Pair<>(BED_BREAK, "&c%player_1% &7broke &e%player_2%'s &7bed."));
         list.add(new Pair<>(GAME_START, "&8&m------------------------------------&r\n \n   &7Map&8: &e%map_name%\n   &7Mode&8: &e%map_mode%\n   &7Rounds&8: &e%map_rounds%\n \n&8&m------------------------------------&r"));
-        list.add(new Pair<>(GAME_END, "&e%winner% &awon the game."));
+        list.add(new Pair<>(GAME_END, "&e%winner% &cwon the game."));
         list.add(new Pair<>(LOADING_PROGRESS_ACTION_BAR, "&8» &eLoading... &8> &e%progress%%"));
         list.add(new Pair<>(STATS_RESET, "&7Trying to reset stats..."));
-        list.add(new Pair<>(STATS_RESET_SUCCESS, "&aThe stats have been successfully reset!"));
+        list.add(new Pair<>(STATS_RESET_SUCCESS, "&cThe stats have been successfully reset!"));
         list.add(new Pair<>(UNKNOWN_PLAYER, "&cPlayer not found."));
         list.add(new Pair<>(UPDATE_AVAILABLE, "&7A new update is available&8: &e%version%"));
         list.add(new Pair<>(SUDO_COMMAND_PLAYER_MESSAGE, "&cThis command can be executed only from the console."));
@@ -157,7 +157,7 @@ public class MessageConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(SETUP_BED_PLAYER_2, "&7Stand on the lower part of the second player's bed and look at the upper part. Type '&enext&7'."));
         list.add(new Pair<>(SETUP_BED_PLAYER_3, "&7Stand on the lower part of the third player's bed and look at the upper part. Type '&enext&7'."));
         list.add(new Pair<>(SETUP_BED_PLAYER_4, "&7Stand on the lower part of the fourth player's bed and look at the upper part. Type '&enext&7'."));
-        list.add(new Pair<>(SETUP_FINISH, "&aThe setup has been finished!"));
+        list.add(new Pair<>(SETUP_FINISH, "&cThe setup has been finished!"));
     }
 
     private void migrateBranding() {
