@@ -27,9 +27,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public abstract class DataSaver {
+
+    private static final int SQLITE_BUSY_TIMEOUT_MILLIS = 250;
+    private static final long SQLITE_BUSY_COOLDOWN_MILLIS = 1_000L;
+    private static final long SQLITE_BUSY_LOG_INTERVAL_MILLIS = 30_000L;
 
     @Inject
     protected ExceptionHandler exceptionHandler;
@@ -47,6 +50,11 @@ public abstract class DataSaver {
     @Nullable
     private Connection connection;
 
+    private final Object databaseLock = new Object();
+
+    private volatile long sqliteWritesBlockedUntil;
+    private volatile long nextSQLiteBusyLogAt;
+
     @PostConstruct
     public void init() {
         params = initParams();
@@ -55,65 +63,77 @@ public abstract class DataSaver {
     }
 
     public boolean isConnected() {
-        try {
-            return connection != null && !connection.isClosed();
-        } catch (SQLException throwables) {
-            exceptionHandler.handleUnexpected(throwables);
+        synchronized (databaseLock) {
+            return isConnectedUnsafe();
+        }
+    }
+
+    protected boolean executeUpdateSync(final @NotNull String query) {
+        logQuery(query);
+        synchronized (databaseLock) {
+            if (!params.isMySQL()
+                    && System.currentTimeMillis() < sqliteWritesBlockedUntil) {
+                return false;
+            }
+            if (checkConnection()) {
+                try (final PreparedStatement preparedStatement = connection.prepareStatement(replaceName(query))) {
+                    preparedStatement.executeUpdate();
+                    sqliteWritesBlockedUntil = 0L;
+                    return true;
+                } catch (SQLException exception) {
+                    if (!params.isMySQL() && isSQLiteBusy(exception)) {
+                        handleSQLiteBusy();
+                    } else {
+                        exceptionHandler.handleUnexpected(exception);
+                    }
+                    return false;
+                }
+            }
         }
         return false;
     }
 
-    protected void executeUpdateSync(final @NotNull String query) {
-        if (debugConfig.getBoolean(DebugConfig.LOG_QUERIES)) {
-            javaPlugin.getLogger().info(String.format(Constants.QUERY_MESSAGE, query));
-        }
-        if (checkConnection()) {
-            try (final PreparedStatement preparedStatement = connection.prepareStatement(replaceName(query))) {
-                preparedStatement.executeUpdate();
-            } catch (SQLException exception) {
-                exceptionHandler.handleUnexpected(exception);
-            }
-        }
-    }
-
     protected void executeUpdateAsync(final @NotNull String query) {
-        threadPoolManager.submit(() -> executeUpdateSync(query));
+        threadPoolManager.submitDatabase(() -> executeUpdateSync(query));
     }
 
-    protected Optional<ResultSet> executeQuerySync(final @NotNull String query) {
-        if (debugConfig.getBoolean(DebugConfig.LOG_QUERIES)) {
-            javaPlugin.getLogger().info(String.format(Constants.QUERY_MESSAGE, query));
-        }
-        if (checkConnection()) {
-            try {
-                final PreparedStatement preparedStatement = connection.prepareStatement(replaceName(query));
-                final ResultSet resultSet = preparedStatement.executeQuery();
-                return Optional.of(resultSet);
-            } catch (SQLException exception) {
-                exceptionHandler.handleUnexpected(exception);
+    protected <T> Optional<T> executeQuerySync(final @NotNull String query,
+                                               final @NotNull ResultSetHandler<T> handler) {
+        logQuery(query);
+        synchronized (databaseLock) {
+            if (checkConnection()) {
+                try (final PreparedStatement preparedStatement = connection.prepareStatement(replaceName(query));
+                     final ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return Optional.ofNullable(handler.handle(resultSet));
+                } catch (SQLException exception) {
+                    exceptionHandler.handleUnexpected(exception);
+                }
             }
         }
         return Optional.empty();
     }
 
     protected void executeQueryAsync(final @NotNull String query, final @NotNull Callback callback) {
-        if (checkConnection()) {
-            final CompletableFuture<Optional<ResultSet>> future = CompletableFuture.supplyAsync(() -> executeQuerySync(query), threadPoolManager.getThreadPool());
-            future.whenComplete((optional, throwable) -> {
-                try {
-                    if (optional.isPresent()) {
-                        callback.onSuccess(optional.get());
-                    } else {
-                        callback.onFailure(Optional.empty());
+        threadPoolManager.submitDatabase(() -> {
+            logQuery(query);
+            synchronized (databaseLock) {
+                if (checkConnection()) {
+                    try (final PreparedStatement preparedStatement = connection.prepareStatement(replaceName(query));
+                         final ResultSet resultSet = preparedStatement.executeQuery()) {
+                        callback.onSuccess(resultSet);
+                    } catch (SQLException exception) {
+                        exceptionHandler.handleUnexpected(exception);
+                        callback.onFailure(Optional.of(exception));
                     }
-                } catch (SQLException exception) {
-                    exceptionHandler.handleUnexpected(exception);
-                    callback.onFailure(Optional.of(exception));
+                } else {
+                    try {
+                        callback.onFailure(Optional.empty());
+                    } catch (RuntimeException exception) {
+                        exceptionHandler.handleUnexpected(exception);
+                    }
                 }
-            });
-        } else {
-            callback.onFailure(Optional.empty());
-        }
+            }
+        });
     }
 
     protected abstract DataSaverParams initParams();
@@ -124,36 +144,49 @@ public abstract class DataSaver {
     protected abstract List<Pair<String, String>> columns(final @NotNull List<Pair<String, String>> columns);
 
     private boolean checkConnection() {
-        if (!isConnected()) {
-            createConnection();
+        synchronized (databaseLock) {
+            if (!isConnectedUnsafe()) {
+                createConnection();
+            }
+            return isConnectedUnsafe();
         }
-        return isConnected();
     }
 
     private void initTable() {
-        if (isConnected()) {
-            executeUpdateSync(creationQuery());
-            final List<Pair<String, String>> columns = columns(new ArrayList<>());
-            try {
-                final DatabaseMetaData databaseMetaData = connection.getMetaData();
+        synchronized (databaseLock) {
+            if (checkConnection()) {
+                executeUpdateSync(creationQuery());
+                final List<Pair<String, String>> columns = columns(new ArrayList<>());
+                try {
+                    final DatabaseMetaData databaseMetaData = connection.getMetaData();
 
-                for (final Pair<String, String> pair : columns) {
-                    final String columnName = pair.getKey();
-                    final String value = pair.getValue();
+                    for (final Pair<String, String> pair : columns) {
+                        final String columnName = pair.getKey();
+                        final String value = pair.getValue();
 
-                    final ResultSet resultSet = databaseMetaData.getColumns(null, null,
-                            replaceName("{name}"), columnName);
-
-                    if (resultSet != null) {
-                        if (!resultSet.next()) {
+                        final boolean missingColumn;
+                        try (final ResultSet resultSet = databaseMetaData.getColumns(null, null,
+                                replaceName("{name}"), columnName)) {
+                            missingColumn = !resultSet.next();
+                        }
+                        if (missingColumn) {
                             executeUpdateSync(String.format("ALTER TABLE {name} ADD COLUMN %s;", columnName + " " + value));
                         }
                     }
+                } catch (SQLException sqlException) {
+                    exceptionHandler.handleUnexpected(sqlException);
                 }
-            } catch (SQLException sqlException) {
-                exceptionHandler.handleUnexpected(sqlException);
             }
         }
+    }
+
+    private boolean isConnectedUnsafe() {
+        try {
+            return connection != null && !connection.isClosed();
+        } catch (SQLException throwables) {
+            exceptionHandler.handleUnexpected(throwables);
+        }
+        return false;
     }
 
     private void createConnection() {
@@ -175,17 +208,42 @@ public abstract class DataSaver {
 
     @Nullable
     private Connection createSQLiteConnection() {
+        Connection sqliteConnection = null;
         try {
             Class.forName("org.sqlite.JDBC");
 
             final File file = new File(params.getDataFilePath());
             file.getParentFile().mkdirs();
 
-            return DriverManager.getConnection("jdbc:sqlite:" + file.getPath());
+            sqliteConnection = DriverManager.getConnection("jdbc:sqlite:" + file.getPath());
+            try (final Statement statement = sqliteConnection.createStatement()) {
+                statement.execute("PRAGMA busy_timeout = " + SQLITE_BUSY_TIMEOUT_MILLIS);
+                try {
+                    statement.execute("PRAGMA journal_mode = WAL");
+                    statement.execute("PRAGMA synchronous = NORMAL");
+                } catch (SQLException exception) {
+                    if (!isSQLiteBusy(exception)) {
+                        throw exception;
+                    }
+                }
+            }
+            return sqliteConnection;
         } catch (SQLException | ClassNotFoundException throwables) {
+            closeFailedConnection(sqliteConnection, throwables);
             exceptionHandler.handleUnexpected(throwables);
         }
         return null;
+    }
+
+    private void closeFailedConnection(final @Nullable Connection failedConnection,
+                                       final @NotNull Exception originalException) {
+        if (failedConnection != null) {
+            try {
+                failedConnection.close();
+            } catch (SQLException closeException) {
+                originalException.addSuppressed(closeException);
+            }
+        }
     }
 
     private String checkPort(final @NotNull String port) {
@@ -201,6 +259,42 @@ public abstract class DataSaver {
 
     private String replaceName(final @NotNull String query) {
         return query.replace("{name}", params.getTable());
+    }
+
+    private void logQuery(final @NotNull String query) {
+        if (debugConfig.getBoolean(DebugConfig.LOG_QUERIES)) {
+            javaPlugin.getLogger().info(String.format(Constants.QUERY_MESSAGE, query));
+        }
+    }
+
+    private boolean isSQLiteBusy(final @NotNull SQLException exception) {
+        SQLException current = exception;
+        while (current != null) {
+            final String message = current.getMessage();
+            if (current.getErrorCode() == 5
+                    || (message != null && message.contains("SQLITE_BUSY"))) {
+                return true;
+            }
+            current = current.getNextException();
+        }
+        return false;
+    }
+
+    private void handleSQLiteBusy() {
+        final long now = System.currentTimeMillis();
+        sqliteWritesBlockedUntil = now + SQLITE_BUSY_COOLDOWN_MILLIS;
+        if (now >= nextSQLiteBusyLogAt) {
+            nextSQLiteBusyLogAt = now + SQLITE_BUSY_LOG_INTERVAL_MILLIS;
+            javaPlugin.getLogger().warning("SQLite database is locked by another process or plugin: "
+                    + new File(params.getDataFilePath()).getAbsolutePath());
+        }
+    }
+
+    @FunctionalInterface
+    protected interface ResultSetHandler<T> {
+
+        T handle(final @NotNull ResultSet resultSet) throws SQLException;
+
     }
 
     public interface Callback {

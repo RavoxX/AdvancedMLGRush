@@ -33,6 +33,7 @@ public class InventoryNameConfig extends Configurable implements Replaceable {
     public static final String GADGETS = "gadgets";
     public static final String STICK = "stick";
     public static final String BLOCKS = "blocks";
+    public static final String CHAT_COLOR = "chat_color";
     public static final String INVENTORY_SORTING = "inventory_sorting";
     public static final String MAP = "map";
     public static final String ROUNDS = "rounds";
@@ -77,6 +78,7 @@ public class InventoryNameConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(GADGETS, "&8» &bPerks"));
         list.add(new Pair<>(STICK, "&8» &bStick Perks"));
         list.add(new Pair<>(BLOCKS, "&8» &bBlock Perks"));
+        list.add(new Pair<>(CHAT_COLOR, "&8» &cChat Color"));
         list.add(new Pair<>(INVENTORY_SORTING, "&8» &eInventory Sorting"));
         list.add(new Pair<>(MAP, "&8» &eMap"));
         list.add(new Pair<>(ROUNDS, "&8» &eRounds"));

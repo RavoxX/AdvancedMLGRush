@@ -107,7 +107,7 @@ public class SQLDataCache implements Registrable, EventHandler {
     public void saveBlockRemover(final @NotNull Player player) {
         final CachedSQLData cachedSQLData = cache.get(player);
         if (cachedSQLData != null) {
-            mlgDataSaver.updateBlockRemoverSync(player, cachedSQLData);
+            mlgDataSaver.updateBlockRemover(player, cachedSQLData);
         }
     }
 

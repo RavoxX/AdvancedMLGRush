@@ -61,6 +61,7 @@ public class MessageConfig extends Configurable implements Replaceable {
     public static final String SUDO_COMMAND_PLAYER_MESSAGE = "sudo_command_player_message";
     public static final String PING = "ping";
     public static final String NICK_COMMAND_COOLDOWN = "nick_command_cooldown";
+    public static final String CHAT_COLOR_SELECT = "chat_color_select";
 
     //Command syntaxes
     public static final String SETUP_MAP_COMMAND_SYNTAX = "setup_max_command_syntax";
@@ -144,6 +145,7 @@ public class MessageConfig extends Configurable implements Replaceable {
         list.add(new Pair<>(PING, "&7Your ping&8: &c%ping%ms"));
         list.add(new Pair<>(NICK_COMMAND_COOLDOWN,
                 "&7Please wait &c%seconds%s &7before using /nick or /unnick again."));
+        list.add(new Pair<>(CHAT_COLOR_SELECT, "&7Your chat color is now %chat_color%&7."));
 
         list.add(new Pair<>(SETUP_MAP_COMMAND_SYNTAX, "&cWrong syntax: /setupmap <2x1, 4x1> <name>"));
         list.add(new Pair<>(STATS_RESET_COMMAND_SYNTAX, "&cWrong syntax: /statsreset <name>"));

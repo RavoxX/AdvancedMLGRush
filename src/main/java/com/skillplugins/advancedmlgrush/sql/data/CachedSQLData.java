@@ -30,6 +30,7 @@ public class CachedSQLData {
     private int settingsBlockRemover = BlockRemover.NORMAL.getId();
     private int gadgetsStick = 0;
     private int gadgetsBlocks = 0;
+    private String chatColor = "";
     private int statsWins = 0;
     private int statsLoses = 0;
     private int statsBeds = 0;

@@ -58,7 +58,7 @@ public class MLGDataSaver extends DataSaver {
 
 
     public CompletableFuture<CachedSQLData> getPlayerData(final @NotNull Player player) {
-        return CompletableFuture.supplyAsync(() -> getPlayerDataSync(player), threadPoolManager.getThreadPool());
+        return CompletableFuture.supplyAsync(() -> getPlayerDataSync(player), threadPoolManager.getDatabaseThreadPool());
     }
 
     public void updatePlayer(final @NotNull Player player, final @NotNull CachedSQLData cachedSQLData) {
@@ -75,19 +75,21 @@ public class MLGDataSaver extends DataSaver {
                             "settings_block_remover = '%6$s', " +
                             "gadgets_stick = '%7$s', " +
                             "gadgets_blocks = '%8$s', " +
-                            "stats_wins = '%9$s', " +
-                            "stats_loses = '%10$s', " +
-                            "stats_beds = '%11$s', " +
-                            "stats_kills = '%12$s', " +
-                            "stats_deaths = '%13$s', " +
-                            "stats_placed_blocks = '%14$s' " +
+                            "chat_color = '%9$s', " +
+                            "stats_wins = '%10$s', " +
+                            "stats_loses = '%11$s', " +
+                            "stats_beds = '%12$s', " +
+                            "stats_kills = '%13$s', " +
+                            "stats_deaths = '%14$s', " +
+                            "stats_placed_blocks = '%15$s' " +
                             (isOfflineMode
-                                    ? "WHERE player_name = '%15$s';"
-                                    : "WHERE player_uuid = '%15$s';"),
+                                    ? "WHERE player_name = '%16$s';"
+                                    : "WHERE player_uuid = '%16$s';"),
                     cachedSQLData.getSettingsStickSlot(), cachedSQLData.getSettingsBlockSlot(),
                     cachedSQLData.getSettingsPickaxeSlot(), cachedSQLData.getSettingsMap(),
                     cachedSQLData.getSettingsRounds(), cachedSQLData.getSettingsBlockRemover(),
-                    cachedSQLData.getGadgetsStick(), cachedSQLData.getGadgetsBlocks(), cachedSQLData.getStatsWins(),
+                    cachedSQLData.getGadgetsStick(), cachedSQLData.getGadgetsBlocks(), cachedSQLData.getChatColor(),
+                    cachedSQLData.getStatsWins(),
                     cachedSQLData.getStatsLoses(), cachedSQLData.getStatsBeds(),
                     cachedSQLData.getStatsKills(), cachedSQLData.getStatsDeaths(),
                     cachedSQLData.getStatsPlacedBlocks(),
@@ -95,11 +97,11 @@ public class MLGDataSaver extends DataSaver {
         }
     }
 
-    public void updateBlockRemoverSync(final @NotNull Player player,
-                                       final @NotNull CachedSQLData cachedSQLData) {
+    public void updateBlockRemover(final @NotNull Player player,
+                                   final @NotNull CachedSQLData cachedSQLData) {
         if (isConnected()
                 && !cachedSQLData.isDefaultData()) {
-            executeUpdateSync(String.format(
+            executeUpdateAsync(String.format(
                     "UPDATE {name} " +
                             "SET settings_block_remover = '%1$s' " +
                             (isOfflineMode
@@ -195,6 +197,7 @@ public class MLGDataSaver extends DataSaver {
                 "settings_block_remover TINYINT NOT NULL DEFAULT 1, " +
                 "gadgets_stick SMALLINT NOT NULL DEFAULT 0, " +
                 "gadgets_blocks SMALLINT NOT NULL DEFAULT 0, " +
+                "chat_color VARCHAR(1) NOT NULL DEFAULT '', " +
                 "stats_wins INT NOT NULL DEFAULT 0, " +
                 "stats_loses INT NOT NULL DEFAULT 0, " +
                 "stats_beds INT NOT NULL DEFAULT 0, " +
@@ -216,6 +219,7 @@ public class MLGDataSaver extends DataSaver {
         columns.add(new Pair<>("settings_block_remover", "TINYINT NOT NULL DEFAULT 1"));
         columns.add(new Pair<>("gadgets_stick", "SMALLINT NOT NULL DEFAULT 0"));
         columns.add(new Pair<>("gadgets_blocks", "SMALLINT NOT NULL DEFAULT 0"));
+        columns.add(new Pair<>("chat_color", "VARCHAR(1) NOT NULL DEFAULT ''"));
         columns.add(new Pair<>("stats_wins", "INT NOT NULL DEFAULT 0"));
         columns.add(new Pair<>("stats_loses", "INT NOT NULL DEFAULT 0"));
         columns.add(new Pair<>("stats_beds", "INT NOT NULL DEFAULT 0"));
@@ -228,34 +232,28 @@ public class MLGDataSaver extends DataSaver {
     private CachedSQLData getPlayerDataSync(final @NotNull Player player) {
         final CachedSQLData cachedSQLData = new CachedSQLData();
         if (isConnected()) {
-            if (!isInDatabase(player)) {
-                insertPlayer(player);
+            if (!isInDatabase(player)
+                    && !insertPlayer(player)) {
+                return cachedSQLData;
             }
             checkName(player);
-            getData(player, cachedSQLData);
-            cachedSQLData.setDefaultData(false);
+            if (getData(player, cachedSQLData)) {
+                cachedSQLData.setDefaultData(false);
+            }
         }
         return cachedSQLData;
     }
 
     private boolean isInDatabase(final @NotNull Player player) {
         if (isConnected()) {
-            final Optional<ResultSet> optional = executeQuerySync(String.format(
+            return executeQuerySync(String.format(
                     "SELECT player_name " +
                             "FROM {name} " +
                             (isOfflineMode ?
                                     "WHERE player_name = '%s';"
                                     : "WHERE player_uuid = '%s';"),
-                    isOfflineMode ? player.getName() : player.getUniqueId().toString()));
-
-            if (optional.isPresent()) {
-                final ResultSet resultSet = optional.get();
-                try {
-                    return resultSet.next();
-                } catch (SQLException throwables) {
-                    exceptionHandler.handleUnexpected(throwables);
-                }
-            }
+                    isOfflineMode ? player.getName() : player.getUniqueId().toString()),
+                    ResultSet::next).orElse(false);
         }
         return false;
     }
@@ -263,70 +261,62 @@ public class MLGDataSaver extends DataSaver {
     private void checkName(final @NotNull Player player) {
         if (isConnected()
                 && !isOfflineMode) {
-            final Optional<ResultSet> optional = executeQuerySync(String.format(
+            final Optional<String> storedPlayerName = executeQuerySync(String.format(
                     "SELECT player_name " +
                             "FROM {name} " +
-                            "WHERE player_uuid = '%s';", player.getUniqueId().toString()));
+                            "WHERE player_uuid = '%s';", player.getUniqueId().toString()),
+                    resultSet -> resultSet.next() ? resultSet.getString("player_name") : null);
 
-            if (optional.isPresent()) {
-                final ResultSet resultSet = optional.get();
-                try {
-                    if (resultSet.next()
-                            && !resultSet.getString("player_name").equals(player.getName())) {
-                        executeUpdateSync(String.format(
-                                "UPDATE {name} " +
-                                        "SET player_name = '%1$s'" +
-                                        "WHERE player_uuid = '%2$s';", player.getName(), player.getUniqueId().toString()));
-                    }
-                } catch (SQLException throwables) {
-                    exceptionHandler.handleUnexpected(throwables);
-                }
+            if (storedPlayerName.isPresent()
+                    && !storedPlayerName.get().equals(player.getName())) {
+                executeUpdateSync(String.format(
+                        "UPDATE {name} " +
+                                "SET player_name = '%1$s'" +
+                                "WHERE player_uuid = '%2$s';", player.getName(), player.getUniqueId().toString()));
             }
         }
     }
 
-    private void getData(final @NotNull Player player, final @NotNull CachedSQLData cachedSQLData) {
+    private boolean getData(final @NotNull Player player, final @NotNull CachedSQLData cachedSQLData) {
         if (isConnected()) {
-            final Optional<ResultSet> optional = executeQuerySync(String.format(
+            return executeQuerySync(String.format(
                     "SELECT * " +
                             "FROM {name} " +
                             (isOfflineMode ?
                                     "WHERE player_name = '%s';"
                                     : "WHERE player_uuid = '%s';"),
-                    isOfflineMode ? player.getName() : player.getUniqueId().toString()));
-
-            if (optional.isPresent()) {
-                final ResultSet resultSet = optional.get();
-                try {
-                    if (resultSet.next()) {
-                        cachedSQLData.setSettingsStickSlot(resultSet.getInt("settings_stick_slot"));
-                        cachedSQLData.setSettingsBlockSlot(resultSet.getInt("settings_block_slot"));
-                        cachedSQLData.setSettingsPickaxeSlot(resultSet.getInt("settings_pickaxe_slot"));
-                        cachedSQLData.setSettingsMap(resultSet.getInt("settings_map"));
-                        cachedSQLData.setSettingsRounds(resultSet.getInt("settings_rounds"));
-                        cachedSQLData.setSettingsBlockRemover(resultSet.getInt("settings_block_remover"));
-                        cachedSQLData.setGadgetsStick(resultSet.getInt("gadgets_stick"));
-                        cachedSQLData.setGadgetsBlocks(resultSet.getInt("gadgets_blocks"));
-                        cachedSQLData.setStatsWins(resultSet.getInt("stats_wins"));
-                        cachedSQLData.setStatsLoses(resultSet.getInt("stats_loses"));
-                        cachedSQLData.setStatsBeds(resultSet.getInt("stats_beds"));
-                        cachedSQLData.setStatsKills(resultSet.getInt("stats_kills"));
-                        cachedSQLData.setStatsDeaths(resultSet.getInt("stats_deaths"));
-                        cachedSQLData.setStatsPlacedBlocks(resultSet.getInt("stats_placed_blocks"));
-                    }
-                } catch (SQLException throwables) {
-                    exceptionHandler.handleUnexpected(throwables);
+                    isOfflineMode ? player.getName() : player.getUniqueId().toString()), resultSet -> {
+                if (resultSet.next()) {
+                    cachedSQLData.setSettingsStickSlot(resultSet.getInt("settings_stick_slot"));
+                    cachedSQLData.setSettingsBlockSlot(resultSet.getInt("settings_block_slot"));
+                    cachedSQLData.setSettingsPickaxeSlot(resultSet.getInt("settings_pickaxe_slot"));
+                    cachedSQLData.setSettingsMap(resultSet.getInt("settings_map"));
+                    cachedSQLData.setSettingsRounds(resultSet.getInt("settings_rounds"));
+                    cachedSQLData.setSettingsBlockRemover(resultSet.getInt("settings_block_remover"));
+                    cachedSQLData.setGadgetsStick(resultSet.getInt("gadgets_stick"));
+                    cachedSQLData.setGadgetsBlocks(resultSet.getInt("gadgets_blocks"));
+                    cachedSQLData.setChatColor(resultSet.getString("chat_color"));
+                    cachedSQLData.setStatsWins(resultSet.getInt("stats_wins"));
+                    cachedSQLData.setStatsLoses(resultSet.getInt("stats_loses"));
+                    cachedSQLData.setStatsBeds(resultSet.getInt("stats_beds"));
+                    cachedSQLData.setStatsKills(resultSet.getInt("stats_kills"));
+                    cachedSQLData.setStatsDeaths(resultSet.getInt("stats_deaths"));
+                    cachedSQLData.setStatsPlacedBlocks(resultSet.getInt("stats_placed_blocks"));
+                    return true;
                 }
-            }
+                return false;
+            }).orElse(false);
         }
+        return false;
     }
 
-    private void insertPlayer(final @NotNull Player player) {
+    private boolean insertPlayer(final @NotNull Player player) {
         if (isConnected()) {
-            executeUpdateSync(String.format(
+            return executeUpdateSync(String.format(
                     "INSERT INTO {name} (player_uuid, player_name) " +
                             "VALUES ('%1$s', '%2$s');", player.getUniqueId().toString(), player.getName()));
         }
+        return false;
     }
 
     public enum StatsResetState {

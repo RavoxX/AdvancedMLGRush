@@ -31,3 +31,56 @@ commands:
       - clearstats
   sudo:
   ping:
+permissions:
+  chatcolor.admin:
+    description: Grants access to every chat color.
+    default: false
+    children:
+      chatcolor.0: true
+      chatcolor.1: true
+      chatcolor.2: true
+      chatcolor.3: true
+      chatcolor.4: true
+      chatcolor.5: true
+      chatcolor.6: true
+      chatcolor.7: true
+      chatcolor.8: true
+      chatcolor.9: true
+      chatcolor.a: true
+      chatcolor.b: true
+      chatcolor.c: true
+      chatcolor.d: true
+      chatcolor.e: true
+      chatcolor.f: true
+  chatcolor.0:
+    default: false
+  chatcolor.1:
+    default: false
+  chatcolor.2:
+    default: false
+  chatcolor.3:
+    default: false
+  chatcolor.4:
+    default: false
+  chatcolor.5:
+    default: false
+  chatcolor.6:
+    default: false
+  chatcolor.7:
+    default: false
+  chatcolor.8:
+    default: false
+  chatcolor.9:
+    default: false
+  chatcolor.a:
+    default: false
+  chatcolor.b:
+    default: false
+  chatcolor.c:
+    default: false
+  chatcolor.d:
+    default: false
+  chatcolor.e:
+    default: false
+  chatcolor.f:
+    default: false

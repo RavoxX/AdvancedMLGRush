@@ -78,6 +78,7 @@ public class ItemMaterialConfig extends Configurable {
         list.add(new Pair<>(EnumItem.BLOCK_REMOVER_DEATH_RESET.getConfigPath(), XMaterial.REDSTONE.name()));
         list.add(new Pair<>(EnumItem.GADGETS_STICK.getConfigPath(), XMaterial.STICK.name()));
         list.add(new Pair<>(EnumItem.GADGETS_BLOCKS.getConfigPath(), XMaterial.SANDSTONE.name()));
+        list.add(new Pair<>(EnumItem.GADGETS_CHAT_COLOR.getConfigPath(), XMaterial.NAME_TAG.name()));
         list.add(new Pair<>(EnumItem.SORTING_SAVE.getConfigPath(), XMaterial.LIME_DYE.name()));
         list.add(new Pair<>(EnumItem.SORTING_RESET.getConfigPath(), XMaterial.RED_DYE.name()));
         list.add(new Pair<>(EnumItem.ROUNDS.getConfigPath(), XMaterial.SLIME_BALL.name()));

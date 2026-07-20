@@ -38,6 +38,7 @@ EnumItem {
     BLOCK_REMOVER_DEATH_RESET("block_remover_death_reset"),
     GADGETS_STICK("gadgets_stick"),
     GADGETS_BLOCKS("gadgets_blocks"),
+    GADGETS_CHAT_COLOR("gadgets_chat_color"),
     SORTING_SAVE("sorting_save"),
     SORTING_RESET("sorting_reset"),
     ROUNDS_INCREASE("rounds_increase"),

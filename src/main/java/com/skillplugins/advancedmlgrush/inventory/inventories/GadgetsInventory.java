@@ -38,12 +38,15 @@ public class GadgetsInventory extends AbstractInventory {
 
     private final StickInventory stickInventory;
     private final BlocksInventory blocksInventory;
+    private final ChatColorInventory chatColorInventory;
 
     @Inject
     public GadgetsInventory(final @NotNull StickInventory stickInventory,
-                            final @NotNull BlocksInventory blocksInventory) {
+                            final @NotNull BlocksInventory blocksInventory,
+                            final @NotNull ChatColorInventory chatColorInventory) {
         this.stickInventory = stickInventory;
         this.blocksInventory = blocksInventory;
+        this.chatColorInventory = chatColorInventory;
     }
 
     @PostConstruct
@@ -69,6 +72,7 @@ public class GadgetsInventory extends AbstractInventory {
 
         itemManager.setItem(inventory, Optional.empty(), EnumItem.GADGETS_STICK);
         itemManager.setItem(inventory, Optional.empty(), EnumItem.GADGETS_BLOCKS);
+        itemManager.setItem(inventory, Optional.empty(), EnumItem.GADGETS_CHAT_COLOR);
 
         return new Pair<>(inventory, title);
     }
@@ -93,6 +97,9 @@ public class GadgetsInventory extends AbstractInventory {
                         soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
                     } else if (itemUtils.compare(currentItem, EnumItem.GADGETS_BLOCKS, Optional.of(player))) {
                         blocksInventory.open(player);
+                        soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
+                    } else if (itemUtils.compare(currentItem, EnumItem.GADGETS_CHAT_COLOR, Optional.of(player))) {
+                        chatColorInventory.open(player);
                         soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
                     }
                 }

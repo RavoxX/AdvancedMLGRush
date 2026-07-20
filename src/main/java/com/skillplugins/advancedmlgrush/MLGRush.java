@@ -34,6 +34,7 @@ import com.skillplugins.advancedmlgrush.placeholder.PlaceholderInitializer;
 import com.skillplugins.advancedmlgrush.protocol.ProtocolInitializer;
 import com.skillplugins.advancedmlgrush.sql.ConnectionManager;
 import com.skillplugins.advancedmlgrush.sql.DataInitializer;
+import com.skillplugins.advancedmlgrush.sql.ThreadPoolManager;
 import com.skillplugins.advancedmlgrush.util.PlayerUtils;
 import com.skillplugins.advancedmlgrush.util.WorldUtils;
 import lombok.Getter;
@@ -65,6 +66,8 @@ public class MLGRush extends JavaPlugin {
     private EventHandlerInitializer eventHandlerInitializer;
     @Inject
     private ConnectionManager connectionManager;
+    @Inject
+    private ThreadPoolManager threadPoolManager;
     @Inject
     private CompressorManager compressorManager;
     @Inject
@@ -114,6 +117,7 @@ public class MLGRush extends JavaPlugin {
     @Override
     public void onDisable() {
         playerUtils.restartKick();
+        threadPoolManager.shutdown();
         connectionManager.closeConnections();
     }
 

@@ -20,13 +20,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Singleton
 public class ConnectionManager {
 
-    private final List<Connection> connections = new ArrayList<>();
+    private final List<Connection> connections = new CopyOnWriteArrayList<>();
 
     private final ExceptionHandler exceptionHandler;
 
