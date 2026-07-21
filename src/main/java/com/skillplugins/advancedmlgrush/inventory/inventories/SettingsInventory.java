@@ -19,6 +19,7 @@ import com.skillplugins.advancedmlgrush.config.configs.InventoryNameConfig;
 import com.skillplugins.advancedmlgrush.config.configs.SoundConfig;
 import com.skillplugins.advancedmlgrush.event.EventListener;
 import com.skillplugins.advancedmlgrush.event.EventListenerPriority;
+import com.skillplugins.advancedmlgrush.game.map.AttackRange;
 import com.skillplugins.advancedmlgrush.game.map.BlockRemover;
 import com.skillplugins.advancedmlgrush.inventory.AbstractInventory;
 import com.skillplugins.advancedmlgrush.item.EnumItem;
@@ -83,6 +84,7 @@ public class SettingsInventory extends AbstractInventory {
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_MAP);
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_ROUNDS);
         itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_BLOCK_REMOVER);
+        itemManager.setItem(inventory, Optional.empty(), EnumItem.SETTINGS_ATTACK_RANGE);
 
         return new Pair<>(inventory, title);
     }
@@ -90,6 +92,7 @@ public class SettingsInventory extends AbstractInventory {
     @Override
     protected Inventory onOpen(final @NotNull Inventory inventory, final @NotNull Player player) {
         setBlockRemoverItem(inventory, player);
+        setAttackRangeItem(inventory, player);
         return inventory;
     }
 
@@ -112,6 +115,18 @@ public class SettingsInventory extends AbstractInventory {
                             scheduleBlockRemoverRefresh(event.getInventory(), player);
                             soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
                         }
+                    } else if (event.getRawSlot() == itemManager.getItemSlot(EnumItem.SETTINGS_ATTACK_RANGE)
+                            && itemUtils.isValidItem(currentItem)) {
+                        if (sqlDataCache.isLoaded(player)) {
+                            final CachedSQLData data = sqlDataCache.getSQLData(player);
+                            final int currentRange = AttackRange.clamp(data.getSettingsAttackRange());
+                            final int nextRange = AttackRange.clamp(currentRange + (event.isRightClick() ? -1 : 1));
+                            if (nextRange != currentRange) {
+                                data.setSettingsAttackRange(nextRange);
+                                setAttackRangeItem(event.getInventory(), player);
+                                soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
+                            }
+                        }
                     } else if (itemUtils.compare(currentItem, EnumItem.SETTINGS_MAP, optionalPlayer)) {
                         mapInventory.open(player);
                         soundUtil.playSound(player, SoundConfig.INVENTORY_CLICK);
@@ -128,7 +143,7 @@ public class SettingsInventory extends AbstractInventory {
                 final Player player = (Player) event.getPlayer();
                 if (inventoryUtils.isOpenInventory(player, clazz)) {
                     cancelBlockRemoverRefresh(player);
-                    sqlDataCache.saveBlockRemover(player);
+                    sqlDataCache.saveSettings(player);
                     inventoryManager.unregister(player);
                 }
             }
@@ -172,5 +187,21 @@ public class SettingsInventory extends AbstractInventory {
         itemMeta.setLore(lore);
         itemStack.setItemMeta(itemMeta);
         inventory.setItem(itemManager.getItemSlot(EnumItem.SETTINGS_BLOCK_REMOVER), itemStack);
+    }
+
+    private void setAttackRangeItem(final @NotNull Inventory inventory, final @NotNull Player player) {
+        final int range = AttackRange.clamp(sqlDataCache.getSQLData(player).getSettingsAttackRange());
+        final ItemStack itemStack = itemManager.getItem(Optional.of(player), EnumItem.SETTINGS_ATTACK_RANGE);
+        itemStack.setAmount(range);
+
+        final ItemMeta itemMeta = itemStack.getItemMeta();
+        final List<String> lore = new ArrayList<>();
+        lore.add("\u00a77Left click: \u00a7e+1 block");
+        lore.add("\u00a77Right click: \u00a7e-1 block");
+        lore.add("\u00a77Maximum: \u00a7e" + AttackRange.MAX + " blocks");
+        itemMeta.setLore(lore);
+        itemStack.setItemMeta(itemMeta);
+
+        inventory.setItem(itemManager.getItemSlot(EnumItem.SETTINGS_ATTACK_RANGE), itemStack);
     }
 }

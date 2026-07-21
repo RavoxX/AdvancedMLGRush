@@ -20,6 +20,7 @@ import com.skillplugins.advancedmlgrush.placeholder.placeholders.map.*;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.settings.MapPlaceholder;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.settings.BlockRemoverPlaceholder;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.settings.RoundsPlaceholder;
+import com.skillplugins.advancedmlgrush.placeholder.placeholders.settings.AttackRangePlaceholder;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.stats.*;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.stats.ranking.*;
 import com.skillplugins.advancedmlgrush.placeholder.placeholders.stats.wins.*;
@@ -40,6 +41,7 @@ public class PlaceholderInitializer implements Initializer {
     public void init(final @NotNull Injector injector) {
         placeholderManager.registerPlaceholder(injector.getInstance(RoundsPlaceholder.class));
         placeholderManager.registerPlaceholder(injector.getInstance(BlockRemoverPlaceholder.class));
+        placeholderManager.registerPlaceholder(injector.getInstance(AttackRangePlaceholder.class));
         placeholderManager.registerPlaceholder(injector.getInstance(PlayerPlaceholder.class));
         placeholderManager.registerPlaceholder(injector.getInstance(WinsPlaceholder.class));
         placeholderManager.registerPlaceholder(injector.getInstance(BedsPlaceholder.class));

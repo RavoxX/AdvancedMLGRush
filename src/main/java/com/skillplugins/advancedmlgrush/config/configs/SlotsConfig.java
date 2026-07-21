@@ -46,6 +46,8 @@ public class SlotsConfig extends Configurable {
         changed |= setSlot(EnumItem.SPECTATE, -1);
         changed |= setSlot(EnumItem.STATS, -1);
 
+        changed |= migrateSlot(EnumItem.SETTINGS_MAP, 13, 4);
+        changed |= migrateSlot(EnumItem.SETTINGS_MAP, 3, 4);
         changed |= migrateSlot(EnumItem.STATS_RANKING, 13, 13);
         changed |= migrateSlot(EnumItem.STATS_WINS, 19, 11);
         changed |= migrateSlot(EnumItem.STATS_LOSES, 24, 15);
@@ -74,9 +76,10 @@ public class SlotsConfig extends Configurable {
         list.add(new Pair<>(EnumItem.STATS.getConfigPath(), -1));
         list.add(new Pair<>(EnumItem.QUEUE_LEAVE.getConfigPath(), 4));
         list.add(new Pair<>(EnumItem.SETTINGS_INVENTORY_SORTING.getConfigPath(), -1));
-        list.add(new Pair<>(EnumItem.SETTINGS_MAP.getConfigPath(), 13));
+        list.add(new Pair<>(EnumItem.SETTINGS_MAP.getConfigPath(), 4));
         list.add(new Pair<>(EnumItem.SETTINGS_ROUNDS.getConfigPath(), 15));
         list.add(new Pair<>(EnumItem.SETTINGS_BLOCK_REMOVER.getConfigPath(), 11));
+        list.add(new Pair<>(EnumItem.SETTINGS_ATTACK_RANGE.getConfigPath(), 22));
         list.add(new Pair<>(EnumItem.BLOCK_REMOVER_OFF.getConfigPath(), 11));
         list.add(new Pair<>(EnumItem.BLOCK_REMOVER_NORMAL.getConfigPath(), 13));
         list.add(new Pair<>(EnumItem.BLOCK_REMOVER_DEATH_RESET.getConfigPath(), 15));

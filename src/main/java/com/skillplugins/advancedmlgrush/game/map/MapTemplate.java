@@ -44,21 +44,32 @@ public class MapTemplate {
     }
 
     public void createInstance(final @NotNull List<Player> players, final int rounds) {
-        createInstance(players, rounds, BlockRemover.NORMAL, Runnables.doNothing());
+        createInstance(players, rounds, BlockRemover.NORMAL, AttackRange.DEFAULT, Runnables.doNothing());
     }
 
     public void createInstance(final @NotNull List<Player> players, final int rounds,
                                final @NotNull BlockRemover blockRemover) {
-        createInstance(players, rounds, blockRemover, Runnables.doNothing());
+        createInstance(players, rounds, blockRemover, AttackRange.DEFAULT, Runnables.doNothing());
+    }
+
+    public void createInstance(final @NotNull List<Player> players, final int rounds,
+                               final @NotNull BlockRemover blockRemover, final int attackRange) {
+        createInstance(players, rounds, blockRemover, attackRange, Runnables.doNothing());
     }
 
     public void createInstance(final @NotNull List<Player> players, final int rounds,
                                final @NotNull Runnable onFinish) {
-        createInstance(players, rounds, BlockRemover.NORMAL, onFinish);
+        createInstance(players, rounds, BlockRemover.NORMAL, AttackRange.DEFAULT, onFinish);
     }
 
     public void createInstance(final @NotNull List<Player> players, final int rounds,
                                final @NotNull BlockRemover blockRemover,
+                               final @NotNull Runnable onFinish) {
+        createInstance(players, rounds, blockRemover, AttackRange.DEFAULT, onFinish);
+    }
+
+    public void createInstance(final @NotNull List<Player> players, final int rounds,
+                               final @NotNull BlockRemover blockRemover, final int attackRange,
                                final @NotNull Runnable onFinish) {
         players.forEach(player -> {
             challengeManager.unregister(player);
@@ -66,6 +77,7 @@ public class MapTemplate {
             queue4X1.unregister(player);
             player.getInventory().clear();
         });
-        mapInstanceManager.createInstance(players, this, rounds, blockRemover, onFinish);
+        mapInstanceManager.createInstance(players, this, rounds, blockRemover,
+                AttackRange.clamp(attackRange), onFinish);
     }
 }

@@ -33,6 +33,7 @@ EnumItem {
     SETTINGS_MAP("settings_map"),
     SETTINGS_ROUNDS("settings_rounds"),
     SETTINGS_BLOCK_REMOVER("settings_block_remover"),
+    SETTINGS_ATTACK_RANGE("settings_attack_range"),
     BLOCK_REMOVER_OFF("block_remover_off"),
     BLOCK_REMOVER_NORMAL("block_remover_normal"),
     BLOCK_REMOVER_DEATH_RESET("block_remover_death_reset"),

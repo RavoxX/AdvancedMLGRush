@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.config.configs.MessageConfig;
 import com.skillplugins.advancedmlgrush.game.map.MapInstanceManager;
+import com.skillplugins.advancedmlgrush.game.map.AttackRange;
 import com.skillplugins.advancedmlgrush.game.map.BlockRemover;
 import com.skillplugins.advancedmlgrush.game.map.MapManager;
 import com.skillplugins.advancedmlgrush.game.map.MapTemplate;
@@ -72,6 +73,8 @@ public class ChallengeManager implements Registrable {
                 final int rounds = sqlDataCache.getSQLData(challenged).getSettingsRounds();
                 final BlockRemover blockRemover = BlockRemover.fromId(
                         sqlDataCache.getSQLData(challenged).getSettingsBlockRemover());
+                final int attackRange = AttackRange.clamp(
+                        sqlDataCache.getSQLData(challenged).getSettingsAttackRange());
 
                 if (!optional.isPresent()) {
                     challenger.sendMessage(messageConfig.getWithPrefix(Optional.of(challenger), MessageConfig.ERROR));
@@ -82,7 +85,8 @@ public class ChallengeManager implements Registrable {
                 } else {
                     loadingPlayers.add(challenger);
                     loadingPlayers.add(challenged);
-                    optional.get().createInstance(Arrays.asList(challenged, challenger), rounds, blockRemover, () -> {
+                    optional.get().createInstance(Arrays.asList(challenged, challenger), rounds,
+                            blockRemover, attackRange, () -> {
                         loadingPlayers.remove(challenged);
                         loadingPlayers.remove(challenger);
                     });

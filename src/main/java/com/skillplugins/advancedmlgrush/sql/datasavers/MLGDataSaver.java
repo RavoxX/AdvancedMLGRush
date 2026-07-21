@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import com.skillplugins.advancedmlgrush.annotations.PostConstruct;
 import com.skillplugins.advancedmlgrush.config.configs.DataConfig;
 import com.skillplugins.advancedmlgrush.config.configs.MainConfig;
+import com.skillplugins.advancedmlgrush.game.map.AttackRange;
 import com.skillplugins.advancedmlgrush.miscellaneous.Constants;
 import com.skillplugins.advancedmlgrush.sql.DataSaver;
 import com.skillplugins.advancedmlgrush.sql.DataSaverParams;
@@ -73,21 +74,23 @@ public class MLGDataSaver extends DataSaver {
                             "settings_map = '%4$s', " +
                             "settings_rounds = '%5$s', " +
                             "settings_block_remover = '%6$s', " +
-                            "gadgets_stick = '%7$s', " +
-                            "gadgets_blocks = '%8$s', " +
-                            "chat_color = '%9$s', " +
-                            "stats_wins = '%10$s', " +
-                            "stats_loses = '%11$s', " +
-                            "stats_beds = '%12$s', " +
-                            "stats_kills = '%13$s', " +
-                            "stats_deaths = '%14$s', " +
-                            "stats_placed_blocks = '%15$s' " +
+                            "settings_attack_range = '%7$s', " +
+                            "gadgets_stick = '%8$s', " +
+                            "gadgets_blocks = '%9$s', " +
+                            "chat_color = '%10$s', " +
+                            "stats_wins = '%11$s', " +
+                            "stats_loses = '%12$s', " +
+                            "stats_beds = '%13$s', " +
+                            "stats_kills = '%14$s', " +
+                            "stats_deaths = '%15$s', " +
+                            "stats_placed_blocks = '%16$s' " +
                             (isOfflineMode
-                                    ? "WHERE player_name = '%16$s';"
-                                    : "WHERE player_uuid = '%16$s';"),
+                                    ? "WHERE player_name = '%17$s';"
+                                    : "WHERE player_uuid = '%17$s';"),
                     cachedSQLData.getSettingsStickSlot(), cachedSQLData.getSettingsBlockSlot(),
                     cachedSQLData.getSettingsPickaxeSlot(), cachedSQLData.getSettingsMap(),
                     cachedSQLData.getSettingsRounds(), cachedSQLData.getSettingsBlockRemover(),
+                    AttackRange.clamp(cachedSQLData.getSettingsAttackRange()),
                     cachedSQLData.getGadgetsStick(), cachedSQLData.getGadgetsBlocks(), cachedSQLData.getChatColor(),
                     cachedSQLData.getStatsWins(),
                     cachedSQLData.getStatsLoses(), cachedSQLData.getStatsBeds(),
@@ -97,17 +100,19 @@ public class MLGDataSaver extends DataSaver {
         }
     }
 
-    public void updateBlockRemover(final @NotNull Player player,
-                                   final @NotNull CachedSQLData cachedSQLData) {
+    public void updateSettings(final @NotNull Player player,
+                               final @NotNull CachedSQLData cachedSQLData) {
         if (isConnected()
                 && !cachedSQLData.isDefaultData()) {
             executeUpdateAsync(String.format(
                     "UPDATE {name} " +
-                            "SET settings_block_remover = '%1$s' " +
+                            "SET settings_block_remover = '%1$s', " +
+                            "settings_attack_range = '%2$s' " +
                             (isOfflineMode
-                                    ? "WHERE player_name = '%2$s';"
-                                    : "WHERE player_uuid = '%2$s';"),
+                                    ? "WHERE player_name = '%3$s';"
+                                    : "WHERE player_uuid = '%3$s';"),
                     cachedSQLData.getSettingsBlockRemover(),
+                    AttackRange.clamp(cachedSQLData.getSettingsAttackRange()),
                     isOfflineMode ? player.getName() : player.getUniqueId().toString()));
         }
     }
@@ -195,6 +200,7 @@ public class MLGDataSaver extends DataSaver {
                 "settings_map SMALLINT NOT NULL DEFAULT -1, " +
                 "settings_rounds TINYINT NOT NULL DEFAULT 5, " +
                 "settings_block_remover TINYINT NOT NULL DEFAULT 1, " +
+                "settings_attack_range TINYINT NOT NULL DEFAULT 3, " +
                 "gadgets_stick SMALLINT NOT NULL DEFAULT 0, " +
                 "gadgets_blocks SMALLINT NOT NULL DEFAULT 0, " +
                 "chat_color VARCHAR(1) NOT NULL DEFAULT '', " +
@@ -217,6 +223,7 @@ public class MLGDataSaver extends DataSaver {
         columns.add(new Pair<>("settings_map", "SMALLINT NOT NULL DEFAULT -1"));
         columns.add(new Pair<>("settings_rounds", "TINYINT NOT NULL DEFAULT 5"));
         columns.add(new Pair<>("settings_block_remover", "TINYINT NOT NULL DEFAULT 1"));
+        columns.add(new Pair<>("settings_attack_range", "TINYINT NOT NULL DEFAULT 3"));
         columns.add(new Pair<>("gadgets_stick", "SMALLINT NOT NULL DEFAULT 0"));
         columns.add(new Pair<>("gadgets_blocks", "SMALLINT NOT NULL DEFAULT 0"));
         columns.add(new Pair<>("chat_color", "VARCHAR(1) NOT NULL DEFAULT ''"));
@@ -293,6 +300,7 @@ public class MLGDataSaver extends DataSaver {
                     cachedSQLData.setSettingsMap(resultSet.getInt("settings_map"));
                     cachedSQLData.setSettingsRounds(resultSet.getInt("settings_rounds"));
                     cachedSQLData.setSettingsBlockRemover(resultSet.getInt("settings_block_remover"));
+                    cachedSQLData.setSettingsAttackRange(AttackRange.clamp(resultSet.getInt("settings_attack_range")));
                     cachedSQLData.setGadgetsStick(resultSet.getInt("gadgets_stick"));
                     cachedSQLData.setGadgetsBlocks(resultSet.getInt("gadgets_blocks"));
                     cachedSQLData.setChatColor(resultSet.getString("chat_color"));

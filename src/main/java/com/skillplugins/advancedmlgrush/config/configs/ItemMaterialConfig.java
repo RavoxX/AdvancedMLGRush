@@ -73,6 +73,7 @@ public class ItemMaterialConfig extends Configurable {
         list.add(new Pair<>(EnumItem.SETTINGS_MAP.getConfigPath(), XMaterial.MAP.name()));
         list.add(new Pair<>(EnumItem.SETTINGS_ROUNDS.getConfigPath(), XMaterial.SLIME_BALL.name()));
         list.add(new Pair<>(EnumItem.SETTINGS_BLOCK_REMOVER.getConfigPath(), XMaterial.CLOCK.name()));
+        list.add(new Pair<>(EnumItem.SETTINGS_ATTACK_RANGE.getConfigPath(), XMaterial.BLAZE_ROD.name()));
         list.add(new Pair<>(EnumItem.BLOCK_REMOVER_OFF.getConfigPath(), XMaterial.BARRIER.name()));
         list.add(new Pair<>(EnumItem.BLOCK_REMOVER_NORMAL.getConfigPath(), XMaterial.CLOCK.name()));
         list.add(new Pair<>(EnumItem.BLOCK_REMOVER_DEATH_RESET.getConfigPath(), XMaterial.REDSTONE.name()));

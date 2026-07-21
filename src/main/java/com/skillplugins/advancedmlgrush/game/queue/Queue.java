@@ -18,6 +18,7 @@ import com.skillplugins.advancedmlgrush.config.configs.MainConfig;
 import com.skillplugins.advancedmlgrush.config.configs.MessageConfig;
 import com.skillplugins.advancedmlgrush.config.configs.SoundConfig;
 import com.skillplugins.advancedmlgrush.game.map.MapInstanceManager;
+import com.skillplugins.advancedmlgrush.game.map.AttackRange;
 import com.skillplugins.advancedmlgrush.game.map.BlockRemover;
 import com.skillplugins.advancedmlgrush.game.map.MapManager;
 import com.skillplugins.advancedmlgrush.game.map.MapTemplate;
@@ -137,7 +138,9 @@ public abstract class Queue implements Registrable {
             final Player firstPlayer = queue.get(0);
             final BlockRemover blockRemover = BlockRemover.fromId(
                     sqlDataCache.getSQLData(firstPlayer).getSettingsBlockRemover());
-            mapTemplate.get().createInstance(new ArrayList<>(queue), rounds, blockRemover);
+            final int attackRange = AttackRange.clamp(
+                    sqlDataCache.getSQLData(firstPlayer).getSettingsAttackRange());
+            mapTemplate.get().createInstance(new ArrayList<>(queue), rounds, blockRemover, attackRange);
         }
     }
 }

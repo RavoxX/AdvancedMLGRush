@@ -109,6 +109,8 @@ public class MapInstance implements EventHandler {
     @Getter
     private final BlockRemover blockRemover;
     @Getter
+    private final int attackRange;
+    @Getter
     private boolean loaded = false;
 
     @Getter
@@ -162,13 +164,15 @@ public class MapInstance implements EventHandler {
     public MapInstance(final @Assisted @NotNull MapTemplate mapTemplate,
                        final @Assisted @NotNull MapData mapData,
                        final @Assisted @NotNull BiMap<Player, Integer> players,
-                       final @Assisted int rounds,
-                       final @Assisted @NotNull BlockRemover blockRemover) {
+                       final @Assisted("rounds") int rounds,
+                       final @Assisted @NotNull BlockRemover blockRemover,
+                       final @Assisted("attackRange") int attackRange) {
         this.mapTemplate = mapTemplate;
         this.mapData = mapData;
         this.players = players;
         this.rounds = rounds;
         this.blockRemover = blockRemover;
+        this.attackRange = AttackRange.clamp(attackRange);
     }
 
     @PostConstruct
@@ -232,6 +236,10 @@ public class MapInstance implements EventHandler {
                     if (players.containsKey(damager)
                             && players.containsKey(entity)) {
                         if (loaded) {
+                            if (!canAttack(damager, entity)) {
+                                event.setCancelled(true);
+                                return;
+                            }
                             event.setCancelled(false);
                             event.setDamage(0);
                             killMap.put(entity, damager);
@@ -662,6 +670,33 @@ public class MapInstance implements EventHandler {
     private void cancelBlockRemovalTasks() {
         blockRemovalTasks.forEach(Bukkit.getScheduler()::cancelTask);
         blockRemovalTasks.clear();
+    }
+
+    public boolean canAttack(final @NotNull Player attacker, final @NotNull Player target) {
+        if (!loaded
+                || !players.containsKey(attacker)
+                || !players.containsKey(target)
+                || attacker.equals(target)) {
+            return false;
+        }
+        if (!attacker.getWorld().equals(target.getWorld())) {
+            return false;
+        }
+        final Location eyeLocation = attacker.getEyeLocation();
+        final Location targetLocation = target.getLocation();
+        final double horizontalX = Math.max(Math.abs(eyeLocation.getX() - targetLocation.getX()) - 0.3D, 0.0D);
+        final double horizontalZ = Math.max(Math.abs(eyeLocation.getZ() - targetLocation.getZ()) - 0.3D, 0.0D);
+        final double vertical;
+        if (eyeLocation.getY() < targetLocation.getY()) {
+            vertical = targetLocation.getY() - eyeLocation.getY();
+        } else if (eyeLocation.getY() > targetLocation.getY() + 1.8D) {
+            vertical = eyeLocation.getY() - targetLocation.getY() - 1.8D;
+        } else {
+            vertical = 0.0D;
+        }
+        final double maximumDistanceSquared = (double) attackRange * attackRange;
+        return horizontalX * horizontalX + vertical * vertical + horizontalZ * horizontalZ
+                <= maximumDistanceSquared;
     }
 
     private static final class PlacedBlock {
